@@ -1086,7 +1086,6 @@
             background: linear-gradient(to right, var(--accent) 0%, var(--accent) var(--progress-pct, 0%), #e0e0e8 var(--progress-pct, 0%), #e0e0e8 100%);
             outline: none;
             cursor: pointer;
-            transition: background 0.1s linear;
         }
         .listen-progress-bar::-webkit-slider-thumb {
             -webkit-appearance: none;
@@ -1210,7 +1209,7 @@
             </div>
             <div class="listen-progress-wrapper" id="listenProgressWrapper" style="display:none;">
                 <span class="listen-time" id="listenTimeCurrent">0:00</span>
-                <input type="range" class="listen-progress-bar" id="listenProgressBar" min="0" max="1000" value="0" oninput="seekListenProgress(this.value)" />
+                <input type="range" class="listen-progress-bar" id="listenProgressBar" min="0" max="1000" value="0" oninput="updateProgressVisual(this.value)" onchange="seekListenProgress(this.value)" />
                 <span class="listen-time" id="listenTimeTotal">0:00</span>
             </div>
         </div>
@@ -1889,6 +1888,18 @@
                 progressBar.style.setProperty('--progress-pct', (pct * 100) + '%');
             }
             document.getElementById('listenTimeCurrent').textContent = formatTime(Math.min(elapsed / 1000, listenTotalDuration / 1000));
+        }
+
+        function updateProgressVisual(value) {
+            const pct = parseInt(value) / 10; // 0-100
+            const progressBar = document.getElementById('listenProgressBar');
+            if (progressBar) {
+                progressBar.style.setProperty('--progress-pct', pct + '%');
+            }
+            if (listenTotalDuration > 0) {
+                const ms = (parseInt(value) / 1000) * listenTotalDuration;
+                document.getElementById('listenTimeCurrent').textContent = formatTime(ms / 1000);
+            }
         }
 
         function seekListenProgress(value) {
