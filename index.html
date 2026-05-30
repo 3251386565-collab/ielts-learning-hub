@@ -1793,7 +1793,11 @@
         }
 
         function speakFromSentence(startIdx) {
-            // 清除之前的定时器和语音
+            // 清除之前的定时器和语音（先解绑回调，防止 cancel 触发 stopListenPlay）
+            if (currentUtterance) {
+                currentUtterance.onend = null;
+                currentUtterance.onerror = null;
+            }
             speechSynthesis.cancel();
             listenTimers.forEach(t => clearTimeout(t));
             listenTimers = [];
