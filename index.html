@@ -1062,6 +1062,59 @@
         }
         .listen-transcript .word-clickable { }
 
+        /* 听力进度条 */
+        .listen-progress-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-top: 1rem;
+            width: 100%;
+        }
+        .listen-time {
+            font-size: 0.75rem; font-weight: 700;
+            color: var(--text-muted);
+            min-width: 34px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .listen-progress-bar {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(to right, var(--accent) 0%, var(--accent) var(--progress-pct, 0%), #e0e0e8 var(--progress-pct, 0%), #e0e0e8 100%);
+            outline: none;
+            cursor: pointer;
+            transition: background 0.1s linear;
+        }
+        .listen-progress-bar::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            box-shadow: 0 2px 10px var(--accent-glow);
+            transition: transform 0.15s ease;
+        }
+        .listen-progress-bar::-webkit-slider-thumb:hover {
+            transform: scale(1.25);
+        }
+        .listen-progress-bar::-moz-range-thumb {
+            width: 18px; height: 18px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 10px var(--accent-glow);
+        }
+        .listen-progress-bar::-moz-range-progress {
+            background: var(--accent);
+            height: 6px;
+            border-radius: 3px;
+        }
+
         .listen-nav {
             width: 100%;
             display: flex;
@@ -1154,6 +1207,11 @@
                 <button class="btn-toggle-transcript" id="btnToggleTranscript" onclick="toggleTranscript()">
                     📄 显示原文
                 </button>
+            </div>
+            <div class="listen-progress-wrapper" id="listenProgressWrapper" style="display:none;">
+                <span class="listen-time" id="listenTimeCurrent">0:00</span>
+                <input type="range" class="listen-progress-bar" id="listenProgressBar" min="0" max="1000" value="0" oninput="seekListenProgress(this.value)" />
+                <span class="listen-time" id="listenTimeTotal">0:00</span>
             </div>
         </div>
         <div class="listen-transcript" id="listenTranscript"></div>
@@ -1557,6 +1615,13 @@
             document.getElementById('btnToggleTranscript').textContent = '📄 显示原文';
             document.getElementById('listenTranscript').classList.remove('visible');
             document.getElementById('listenTranscript').innerHTML = '';
+            // 隐藏进度条
+            const progWrapper = document.getElementById('listenProgressWrapper');
+            if (progWrapper) progWrapper.style.display = 'none';
+            document.getElementById('listenTimeCurrent').textContent = '0:00';
+            document.getElementById('listenTimeTotal').textContent = '0:00';
+            const progBar = document.getElementById('listenProgressBar');
+            if (progBar) { progBar.value = 0; progBar.style.setProperty('--progress-pct', '0%'); }
             hideAllPages();
             document.getElementById('listenPage').style.display = 'flex';
             document.getElementById('listenPage').classList.add('active');
@@ -1647,6 +1712,11 @@
         let listenIsPlaying = false;
         let listenUtterances = [];
         let transcriptVisible = false;
+        let listenTimers = [];
+        let listenStartTime = 0;
+        let listenTotalDuration = 0;
+        let listenSentenceStartTimes = [];
+        let listenProgressInterval = null;
 
         function startListenSession() {
             // 保证最近3次中至少有1次真题
@@ -1677,6 +1747,13 @@
             document.getElementById('btnToggleTranscript').textContent = '📄 显示原文';
             document.getElementById('listenTranscript').classList.remove('visible');
             document.getElementById('listenTranscript').innerHTML = '';
+            // 隐藏进度条
+            const progressWrapper = document.getElementById('listenProgressWrapper');
+            if (progressWrapper) progressWrapper.style.display = 'none';
+            document.getElementById('listenTimeCurrent').textContent = '0:00';
+            document.getElementById('listenTimeTotal').textContent = '0:00';
+            const progressBar = document.getElementById('listenProgressBar');
+            if (progressBar) { progressBar.value = 0; progressBar.style.setProperty('--progress-pct', '0%'); }
 
             // 保存历史
             const history = getListenHistory();
@@ -1702,18 +1779,55 @@
             if (!currentPassage) return;
             stopSpeaking();
             listenIsPlaying = true;
-            listenSentenceIndex = 0;
-            listenUtterances = [];
 
             const btn = document.getElementById('btnListenPlay');
             btn.classList.add('playing');
             document.getElementById('btnListenLabel').textContent = '停止播放';
 
-            buildTranscriptDOM();
+            // 显示进度条
+            const progressWrapper = document.getElementById('listenProgressWrapper');
+            if (progressWrapper) progressWrapper.style.display = 'flex';
 
+            buildTranscriptDOM();
+            speakFromSentence(0);
+        }
+
+        function speakFromSentence(startIdx) {
+            // 清除之前的定时器和语音
+            speechSynthesis.cancel();
+            listenTimers.forEach(t => clearTimeout(t));
+            listenTimers = [];
+            if (listenProgressInterval) clearInterval(listenProgressInterval);
+
+            listenSentenceIndex = startIdx;
             const sentences = currentPassage.sentences;
-            const fullText = sentences.join(' ');
-            const utterance = new SpeechSynthesisUtterance(fullText);
+            const remainingSentences = sentences.slice(startIdx);
+
+            // 计算全文字数和时间
+            const allWordCounts = sentences.map(s => s.split(' ').length);
+            const totalWords = allWordCounts.reduce((a, b) => a + b, 0);
+            const wordsPerSec = 2.2;
+            listenTotalDuration = (totalWords / wordsPerSec) * 1000;
+
+            // 计算每句的起始时间（ms）
+            listenSentenceStartTimes = [];
+            let elapsed = 0;
+            for (let i = 0; i < sentences.length; i++) {
+                listenSentenceStartTimes.push(elapsed);
+                elapsed += (allWordCounts[i] / totalWords) * listenTotalDuration;
+            }
+
+            // 设置进度条最大值
+            const progressBar = document.getElementById('listenProgressBar');
+            if (progressBar) {
+                progressBar.max = 1000;
+                progressBar.value = Math.round((listenSentenceStartTimes[startIdx] / listenTotalDuration) * 1000);
+            }
+            document.getElementById('listenTimeTotal').textContent = formatTime(listenTotalDuration / 1000);
+
+            // 从 startIdx 开始播放
+            const remainingText = remainingSentences.join(' ');
+            const utterance = new SpeechSynthesisUtterance(remainingText);
             utterance.lang = 'en-US';
             utterance.rate = 0.88;
             const voices = speechSynthesis.getVoices();
@@ -1722,37 +1836,79 @@
                 || voices.find(v => v.lang.startsWith('en'));
             if (enVoice) utterance.voice = enVoice;
 
-            // 使用定时器估算句子高亮（每句按词数分配时间比例）
-            const wordCounts = sentences.map(s => s.split(' ').length);
-            const totalWords = wordCounts.reduce((a, b) => a + b, 0);
-            // 估算总时长：平均每秒2.5个词（rate 0.88 稍慢）
-            const wordsPerSec = 2.2;
-            const totalDuration = (totalWords / wordsPerSec) * 1000;
-            let elapsed = 0;
-            const timers = [];
+            listenStartTime = Date.now() - listenSentenceStartTimes[startIdx];
 
-            for (let i = 0; i < sentences.length; i++) {
-                const delay = elapsed;
+            // 为剩余句子设置高亮定时器
+            const remainingWordCounts = allWordCounts.slice(startIdx);
+            const remainingTotalWords = remainingWordCounts.reduce((a, b) => a + b, 0);
+            const remainingDuration = (remainingTotalWords / wordsPerSec) * 1000;
+            let timerElapsed = 0;
+
+            for (let i = 0; i < remainingSentences.length; i++) {
+                const sentenceIdx = startIdx + i;
+                const delay = timerElapsed;
                 const timerId = setTimeout(() => {
                     if (!listenIsPlaying) return;
-                    listenSentenceIndex = i;
-                    highlightTranscriptSentence(i);
+                    listenSentenceIndex = sentenceIdx;
+                    highlightTranscriptSentence(sentenceIdx);
                 }, delay);
-                timers.push(timerId);
-                elapsed += (wordCounts[i] / totalWords) * totalDuration;
+                listenTimers.push(timerId);
+                timerElapsed += (remainingWordCounts[i] / remainingTotalWords) * remainingDuration;
             }
 
             utterance.onend = () => {
                 stopListenPlay();
-                timers.forEach(t => clearTimeout(t));
+                listenTimers.forEach(t => clearTimeout(t));
+                // 播放完成，进度条跳到100%
+                if (progressBar) progressBar.value = 1000;
+                document.getElementById('listenTimeCurrent').textContent = formatTime(listenTotalDuration / 1000);
             };
             utterance.onerror = () => {
                 stopListenPlay();
-                timers.forEach(t => clearTimeout(t));
+                listenTimers.forEach(t => clearTimeout(t));
             };
 
             currentUtterance = utterance;
             speechSynthesis.speak(utterance);
+
+            // 启动进度条更新
+            listenProgressInterval = setInterval(updateListenProgress, 100);
+        }
+
+        function updateListenProgress() {
+            if (!listenIsPlaying) return;
+            const elapsed = Date.now() - listenStartTime;
+            const pct = Math.min(elapsed / listenTotalDuration, 1);
+            const progressBar = document.getElementById('listenProgressBar');
+            if (progressBar && document.activeElement !== progressBar) {
+                progressBar.value = Math.round(pct * 1000);
+                progressBar.style.setProperty('--progress-pct', (pct * 100) + '%');
+            }
+            document.getElementById('listenTimeCurrent').textContent = formatTime(Math.min(elapsed / 1000, listenTotalDuration / 1000));
+        }
+
+        function seekListenProgress(value) {
+            if (!currentPassage || !listenIsPlaying) return;
+            const pct = parseInt(value) / 1000;
+            const targetMs = pct * listenTotalDuration;
+
+            // 找到对应句子
+            let targetIdx = 0;
+            for (let i = listenSentenceStartTimes.length - 1; i >= 0; i--) {
+                if (listenSentenceStartTimes[i] <= targetMs) {
+                    targetIdx = i;
+                    break;
+                }
+            }
+
+            speakFromSentence(targetIdx);
+            highlightTranscriptSentence(targetIdx);
+        }
+
+        function seekToSentence(idx) {
+            if (!currentPassage) return;
+            speakFromSentence(idx);
+            highlightTranscriptSentence(idx);
         }
 
         function stopListenPlay() {
@@ -1760,12 +1916,21 @@
             listenIsPlaying = false;
             speechSynthesis.cancel();
             currentUtterance = null;
+            listenTimers.forEach(t => clearTimeout(t));
+            listenTimers = [];
+            if (listenProgressInterval) { clearInterval(listenProgressInterval); listenProgressInterval = null; }
             const btn = document.getElementById('btnListenPlay');
             if (btn) {
                 btn.classList.remove('playing');
                 document.getElementById('btnListenLabel').textContent = '播放听力';
             }
             document.querySelectorAll('.t-sentence.active').forEach(el => el.classList.remove('active'));
+        }
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return m + ':' + String(s).padStart(2, '0');
         }
 
         function buildTranscriptDOM() {
@@ -2021,6 +2186,19 @@
 
         function onWordClick(event, word) {
             event.stopPropagation();
+
+            // 听力播放中点击原文单词 → 跳转到该单词所在句子
+            if (listenIsPlaying && event.target.closest('#listenTranscript')) {
+                const sentenceEl = event.target.closest('.t-sentence');
+                if (sentenceEl) {
+                    const idx = parseInt(sentenceEl.getAttribute('data-sidx'));
+                    if (!isNaN(idx)) {
+                        seekToSentence(idx);
+                        return;
+                    }
+                }
+            }
+
             const wordLower = word.toLowerCase().replace(/[^a-z']/g, '');
             const tooltip = document.getElementById('wordTooltip');
             const tooltipOrig = document.getElementById('tooltipOriginal');
