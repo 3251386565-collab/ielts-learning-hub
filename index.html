@@ -469,7 +469,7 @@
 
         .cn-definition-wrapper {
             position: relative;
-            margin-bottom: 1.4rem;
+            margin-bottom: 0.3rem;
             padding: 0.8rem 1.2rem;
             background: #fffaef; border-radius: 1rem;
             border-left: 4px solid var(--orange);
@@ -495,15 +495,17 @@
         .doodle-cover svg { width: 100%; height: 100%; position: absolute; }
 
         .reveal-btn {
-            position: absolute;
-            bottom: 8px; right: 10px; z-index: 2;
-            display: inline-flex; align-items: center; gap: 0.3rem;
+            display: flex; width: fit-content;
+            align-items: center; gap: 0.3rem;
             padding: 0.4rem 1rem;
+            margin-left: auto;
             font-family: 'Nunito', sans-serif;
             font-size: 0.78rem; font-weight: 800;
             color: var(--orange); background: #fff;
             border: 2px solid #ffeaa7; border-radius: 999px;
             cursor: pointer; transition: all 0.25s ease; white-space: nowrap;
+            margin-top: 0.3rem;
+            margin-bottom: 1.2rem;
         }
         .reveal-btn:hover { background: #fff8e1; border-color: var(--orange); transform: scale(1.04); }
         .reveal-btn.showing { color: #00b894; border-color: #b2f0e2; background: #f0fdf9; }
@@ -574,15 +576,16 @@
         .doodle-cover-example.fading { opacity: 0; }
         .doodle-cover-example svg { width: 100%; height: 100%; position: absolute; }
         .reveal-btn-example {
-            position: absolute;
-            bottom: 4px; right: 8px; z-index: 2;
-            display: inline-flex; align-items: center; gap: 0.25rem;
+            display: flex; width: fit-content;
+            align-items: center; gap: 0.25rem;
             padding: 0.3rem 0.8rem;
+            margin-left: auto;
             font-family: 'Nunito', sans-serif;
             font-size: 0.72rem; font-weight: 800;
             color: var(--green); background: #fff;
             border: 2px solid #b2f0e2; border-radius: 999px;
             cursor: pointer; transition: all 0.25s ease; white-space: nowrap;
+            margin-top: 0.3rem;
         }
         .reveal-btn-example:hover { background: #f0fdf9; border-color: var(--green); transform: scale(1.04); }
         .reveal-btn-example.showing { color: #e74c3c; border-color: #ffcccc; background: #fff5f5; }
@@ -1187,8 +1190,8 @@
             <div class="cn-definition-wrapper" id="cnWrapper">
                 <span class="cn-definition blurred" id="cnDefinition"></span>
                 <div class="doodle-cover" id="doodleCover"></div>
-                <button class="reveal-btn" id="revealBtn" onclick="toggleChinese()">👀 显示</button>
             </div>
+            <button class="reveal-btn" id="revealBtn" onclick="toggleChinese()">👀 显示</button>
             <div class="example-section">
                 <div class="section-label">💬 Example Sentence</div>
                 <div class="example-box">
@@ -1199,8 +1202,8 @@
                     <div class="example-cn-wrapper" id="exampleCnWrapper">
                         <span class="example-cn blurred" id="exampleCn"></span>
                         <div class="doodle-cover-example" id="doodleCoverExample"></div>
-                        <button class="reveal-btn-example" id="revealBtnExample" onclick="toggleExampleCn()">👀 显示翻译</button>
                     </div>
+                    <button class="reveal-btn-example" id="revealBtnExample" onclick="toggleExampleCn()">👀 显示翻译</button>
                 </div>
             </div>
         </div>
