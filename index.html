@@ -1,0 +1,2500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英语学习 - 雅思高频词汇</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #fafafa;
+            --card-bg: #ffffff;
+            --text: #2d2d3a;
+            --text-muted: #8e8e9a;
+            --accent: #6c5ce7;
+            --accent-light: #a29bfe;
+            --accent-glow: rgba(108, 92, 231, 0.25);
+            --border: #e8e8f0;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 12px 48px rgba(0, 0, 0, 0.08);
+            --green: #00b894;
+            --pink: #fd79a8;
+            --orange: #fdcb6e;
+            --teal: #00cec9;
+            --red: #e74c3c;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-weight: 700;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+
+        /* ========== 页面公共动画 ========== */
+        @keyframes pageFadeIn {
+            0% { opacity: 0; transform: translateY(18px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .cover-page, .learn-page, .complete-page, .challenge-page, .listen-page {
+            animation: pageFadeIn 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .learn-page.active, .complete-page.active, .challenge-page.active, .listen-page.active {
+            animation: pageFadeIn 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes cardSlideUp {
+            0% { opacity: 0; transform: translateY(24px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .word-card {
+            animation: cardSlideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .stat-card { transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease; }
+        .stat-card:hover { transform: translateY(-6px) scale(1.02); box-shadow: var(--shadow-lg); }
+
+        /* ========== 封面页 ========== */
+        .cover-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2.5rem;
+            width: 90%;
+            max-width: 640px;
+            text-align: center;
+            padding: 2.5rem 0;
+        }
+        .cover-page h1 {
+            font-size: 2.4rem;
+            font-weight: 900;
+            line-height: 1.25;
+            background: linear-gradient(135deg, #2d2d3a 0%, #6c5ce7 60%, #fd79a8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .btn-wrapper { position: relative; display: inline-flex; }
+        .btn-ring {
+            position: absolute; inset: -6px;
+            border-radius: 999px;
+            border: 2px solid rgba(108, 92, 231, 0.2);
+            animation: ringPulse 2.5s ease-out infinite;
+            pointer-events: none;
+        }
+        .btn-ring:nth-child(2) { animation-delay: 0.8s; }
+        .btn-start {
+            position: relative;
+            display: inline-flex; align-items: center; gap: 0.6rem;
+            padding: 1.3rem 3.5rem;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1.3rem; font-weight: 900;
+            color: #fff; background: var(--accent);
+            border: none; border-radius: 999px;
+            cursor: pointer; letter-spacing: 0.04em;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 32px var(--accent-glow);
+        }
+        .btn-start:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 16px 48px rgba(108, 92, 231, 0.4); }
+        .btn-start:active { transform: translateY(0) scale(0.97); }
+        .btn-start .btn-arrow { font-size: 1.4rem; transition: transform 0.3s ease; }
+        .btn-start:hover .btn-arrow { transform: translateX(5px); }
+
+        @keyframes ringPulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.22); opacity: 0; }
+        }
+
+        /* ========== 历史记录区域 ========== */
+        .history-section {
+            width: 100%;
+            text-align: left;
+        }
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .history-header h3 {
+            font-size: 1.1rem;
+            font-weight: 900;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .history-header .history-count {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            background: #eeeef2;
+            padding: 0.25rem 0.7rem;
+            border-radius: 999px;
+        }
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            max-height: 420px;
+            overflow-y: auto;
+            padding-right: 0.3rem;
+        }
+        .history-list::-webkit-scrollbar { width: 5px; }
+        .history-list::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
+
+        .history-empty {
+            text-align: center;
+            padding: 2.5rem 1rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 700;
+            background: #f8f8fc;
+            border-radius: 1.2rem;
+            border: 1.5px dashed var(--border);
+        }
+        .history-empty .empty-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+
+        .history-card {
+            background: var(--card-bg);
+            border: 1.5px solid var(--border);
+            border-radius: 1.2rem;
+            padding: 1rem 1.3rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+        .history-card:hover {
+            border-color: var(--accent-light);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px) scale(1.01);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .history-card .h-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        .history-card:nth-child(5n+1) .h-icon { background: #f3f0ff; }
+        .history-card:nth-child(5n+2) .h-icon { background: #e6fffa; }
+        .history-card:nth-child(5n+3) .h-icon { background: #fff8e1; }
+        .history-card:nth-child(5n+4) .h-icon { background: #ffeef5; }
+        .history-card:nth-child(5n+5) .h-icon { background: #e8f4fd; }
+
+        .history-card .h-info { flex: 1; min-width: 0; }
+        .history-card .h-date {
+            font-size: 0.9rem; font-weight: 900;
+            color: var(--text); margin-bottom: 0.15rem;
+        }
+        .history-card .h-meta {
+            font-size: 0.78rem; font-weight: 700;
+            color: var(--text-muted);
+            display: flex; align-items: center; gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+        .history-card .h-meta span {
+            display: flex; align-items: center; gap: 0.2rem;
+        }
+        .history-card .h-arrow {
+            font-size: 1.2rem;
+            color: #ccc;
+            transition: all 0.25s ease;
+            flex-shrink: 0;
+        }
+        .history-card:hover .h-arrow {
+            color: var(--accent);
+            transform: translateX(3px);
+        }
+
+        .history-card .h-delete {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            border: 1.5px solid transparent;
+            background: transparent;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            margin-left: 0.3rem;
+        }
+        .history-card .h-delete:hover {
+            color: #e74c3c;
+            background: #fff5f5;
+            border-color: #ffd0d0;
+            transform: scale(1.1);
+        }
+
+        .history-card .h-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            margin-top: 0.35rem;
+        }
+        .history-card .h-tag {
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            background: #f3f0ff;
+            color: var(--accent);
+        }
+
+        /* ========== 学习页 ========== */
+        .learn-page {
+            display: none;
+            flex-direction: column; align-items: center;
+            width: 90%; max-width: 640px;
+            padding: 1.5rem 0 2rem;
+        }
+        .learn-page.active { display: flex; }
+        .top-bar {
+            width: 100%;
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+        .word-counter { font-size: 0.9rem; font-weight: 800; color: var(--text-muted); letter-spacing: 0.04em; }
+        .word-counter strong { color: var(--accent); font-weight: 900; font-size: 1.05rem; }
+
+        .mini-progress-wrapper { position: relative; flex: 1; margin: 0 1.2rem; }
+        .mini-progress {
+            height: 6px;
+            background: #eeeef2; border-radius: 999px;
+            overflow: hidden; cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .mini-progress:hover { box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.08); transform: scaleY(1.6); }
+        .mini-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--teal));
+            border-radius: 999px;
+            transition: width 0.4s ease;
+        }
+        .number-grid-popup {
+            position: absolute; top: 100%; left: 50%;
+            transform: translateX(-50%) translateY(8px);
+            background: #fff;
+            border: 2px solid var(--border);
+            border-radius: 1.2rem; padding: 1rem;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+            z-index: 100; display: none;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0.4rem; min-width: 300px;
+        }
+        .number-grid-popup.open {
+            display: grid;
+            animation: popIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes popIn {
+            0% { opacity: 0; transform: translateX(-50%) translateY(12px) scale(0.95); }
+            100% { opacity: 1; transform: translateX(-50%) translateY(8px) scale(1); }
+        }
+        .number-grid-popup .grid-num {
+            width: 100%; aspect-ratio: 1;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.85rem; font-weight: 800;
+            color: var(--text-muted); background: #f8f8fc;
+            border: 1.5px solid transparent;
+            border-radius: 0.6rem; cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .number-grid-popup .grid-num {
+            transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .number-grid-popup .grid-num:hover {
+            color: var(--accent); background: #f3f0ff;
+            border-color: var(--accent-light);
+            transform: scale(1.15);
+            box-shadow: 0 4px 12px rgba(108, 92, 231, 0.12);
+        }
+        .number-grid-popup .grid-num.active {
+            color: #fff; background: var(--accent); border-color: var(--accent);
+            transform: scale(1.05);
+        }
+
+        .exit-btn {
+            background: none;
+            border: 1.5px solid var(--border);
+            border-radius: 2rem;
+            padding: 0.4rem 1rem;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.8rem; font-weight: 800;
+            color: var(--text-muted); cursor: pointer;
+            transition: all 0.2s ease; background: #fff;
+        }
+        .exit-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+        .word-card {
+            width: 100%;
+            background: var(--card-bg);
+            border: 1.5px solid var(--border);
+            border-radius: 2rem;
+            padding: 2.2rem 2rem;
+            box-shadow: var(--shadow);
+            text-align: center; position: relative;
+        }
+
+        .type-tag {
+            display: inline-block;
+            font-size: 0.78rem; font-weight: 800;
+            padding: 0.3rem 1rem;
+            border-radius: 999px; letter-spacing: 0.06em;
+            margin-bottom: 0.8rem;
+        }
+        .type-tag.word { background: #f3f0ff; color: var(--accent); }
+        .type-tag.phrase { background: #e6fffa; color: #00a085; }
+
+        .word-english-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 0.2rem;
+        }
+        .word-english {
+            font-size: 2.6rem; font-weight: 900;
+            color: var(--text); letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+        .word-english.phrase-text { font-size: 1.8rem; }
+        .word-phonetic { font-size: 1rem; font-weight: 600; color: var(--text-muted); margin-bottom: 1.5rem; }
+
+        /* 喇叭按钮 */
+        .speaker-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            border: 2px solid #e0e0e8;
+            background: #fff;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            color: var(--text-muted);
+            line-height: 1;
+        }
+        .speaker-btn:hover {
+            border-color: var(--accent-light);
+            color: var(--accent);
+            background: #f8f7ff;
+            transform: scale(1.08);
+        }
+        .speaker-btn:active { transform: scale(0.94); }
+        .speaker-btn.speaking {
+            border-color: var(--accent);
+            color: #fff;
+            background: var(--accent);
+            animation: speakerPulse 0.6s ease-in-out infinite;
+        }
+        @keyframes speakerPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(108, 92, 231, 0.4); }
+            50% { box-shadow: 0 0 0 12px rgba(108, 92, 231, 0); }
+        }
+        .speaker-btn-sm {
+            width: 30px; height: 30px;
+            font-size: 0.85rem;
+            border-width: 1.5px;
+        }
+        .speaker-btn-lg {
+            width: 46px; height: 46px;
+            font-size: 1.3rem;
+        }
+
+        .en-definition-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            margin-bottom: 1.4rem;
+        }
+        .en-definition-row .en-definition {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        .en-definition-row .speaker-btn {
+            margin-top: 0.6rem;
+        }
+
+        .example-en-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+        .example-en-row .example-en {
+            flex: 1;
+            margin-bottom: 0.5rem;
+        }
+        .example-en-row .speaker-btn {
+            margin-top: 0.15rem;
+        }
+
+        .article-speaker-row {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 1rem;
+        }
+        .section-label {
+            font-size: 0.75rem; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.12em;
+            color: var(--accent-light); margin-bottom: 0.4rem;
+        }
+
+        .en-definition {
+            font-size: 1.05rem; font-weight: 700;
+            color: var(--text); margin-bottom: 1.4rem;
+            line-height: 1.5; padding: 0.8rem 1.2rem;
+            background: #f8f7ff; border-radius: 1rem;
+            border-left: 4px solid var(--accent-light);
+        }
+
+        .cn-definition-wrapper {
+            position: relative;
+            margin-bottom: 1.4rem;
+            padding: 0.8rem 1.2rem;
+            background: #fffaef; border-radius: 1rem;
+            border-left: 4px solid var(--orange);
+            min-height: 3rem;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .cn-definition {
+            font-size: 1.05rem; font-weight: 800;
+            color: var(--text);
+            transition: filter 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+                        opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .cn-definition.blurred { filter: blur(7px); opacity: 0.12; user-select: none; }
+        .doodle-cover {
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            pointer-events: none;
+            border-radius: 1rem; overflow: hidden;
+            transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 1;
+        }
+        .doodle-cover.fading { opacity: 0; }
+        .doodle-cover svg { width: 100%; height: 100%; position: absolute; }
+
+        .reveal-btn {
+            position: absolute;
+            bottom: 8px; right: 10px; z-index: 2;
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            padding: 0.4rem 1rem;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.78rem; font-weight: 800;
+            color: var(--orange); background: #fff;
+            border: 2px solid #ffeaa7; border-radius: 999px;
+            cursor: pointer; transition: all 0.25s ease; white-space: nowrap;
+        }
+        .reveal-btn:hover { background: #fff8e1; border-color: var(--orange); transform: scale(1.04); }
+        .reveal-btn.showing { color: #00b894; border-color: #b2f0e2; background: #f0fdf9; }
+
+        .example-box {
+            background: #f0fdf9;
+            border-radius: 1rem;
+            border-left: 4px solid var(--green);
+            padding: 1rem 1.2rem;
+            text-align: left;
+            position: relative;
+        }
+        .example-en {
+            font-size: 1.05rem; font-weight: 700;
+            color: var(--text);
+            line-height: 1.9;
+            margin-bottom: 0.5rem;
+            cursor: default;
+        }
+        /* 全局可点击单词样式 */
+        .word-clickable {
+            cursor: pointer;
+            border-radius: 0.22rem;
+            padding: 0 2px;
+            position: relative;
+            display: inline-block;
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .word-clickable:hover {
+            background: rgba(108, 92, 231, 0.13);
+            transform: scale(1.08) translateY(-1px);
+            box-shadow: 0 2px 6px rgba(108, 92, 231, 0.1);
+            z-index: 1;
+        }
+        .word-clickable:active {
+            transform: scale(0.95);
+            transition: all 0.08s ease;
+        }
+        .example-en .word-highlight {
+            color: #e74c3c; font-weight: 900;
+            background: #fff5f5; padding: 0.1rem 0.3rem;
+            border-radius: 0.35rem;
+            border-bottom: 2px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .example-cn-wrapper {
+            position: relative;
+            padding: 0.5rem 0.8rem;
+            background: #fffdf5; border-radius: 0.6rem;
+            min-height: 2rem;
+            display: flex; align-items: center;
+        }
+        .example-cn {
+            font-size: 0.9rem; font-weight: 600;
+            color: var(--text-muted);
+            transition: filter 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+                        opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .example-cn.blurred { filter: blur(5px); opacity: 0.12; user-select: none; }
+        .doodle-cover-example {
+            position: absolute; inset: 0;
+            display: flex; align-items: center; justify-content: center;
+            pointer-events: none;
+            border-radius: 0.6rem; overflow: hidden;
+            transition: opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 1;
+        }
+        .doodle-cover-example.fading { opacity: 0; }
+        .doodle-cover-example svg { width: 100%; height: 100%; position: absolute; }
+        .reveal-btn-example {
+            position: absolute;
+            bottom: 4px; right: 8px; z-index: 2;
+            display: inline-flex; align-items: center; gap: 0.25rem;
+            padding: 0.3rem 0.8rem;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.72rem; font-weight: 800;
+            color: var(--green); background: #fff;
+            border: 2px solid #b2f0e2; border-radius: 999px;
+            cursor: pointer; transition: all 0.25s ease; white-space: nowrap;
+        }
+        .reveal-btn-example:hover { background: #f0fdf9; border-color: var(--green); transform: scale(1.04); }
+        .reveal-btn-example.showing { color: #e74c3c; border-color: #ffcccc; background: #fff5f5; }
+
+        /* 词译弹窗 */
+        .word-tooltip {
+            position: fixed; z-index: 9999; pointer-events: none;
+            opacity: 0; transform: translateY(10px) scale(0.92);
+            transition: opacity 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                        transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .word-tooltip.visible {
+            opacity: 1; transform: translateY(0) scale(1); pointer-events: auto;
+        }
+        .word-tooltip-inner {
+            background: #2d2d3a; color: #fff;
+            padding: 0.6rem 1rem; border-radius: 0.9rem;
+            font-size: 0.85rem; font-weight: 700;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+            text-align: center;
+            backdrop-filter: blur(10px);
+            line-height: 1.5;
+        }
+        .word-tooltip-inner strong { color: #74b9ff; }
+        .word-tooltip-inner .tooltip-original {
+            font-size: 0.72rem; color: rgba(255,255,255,0.55);
+            margin-bottom: 0.1rem; font-weight: 600;
+        }
+        .word-tooltip-arrow {
+            width: 0; height: 0;
+            border-left: 7px solid transparent;
+            border-right: 7px solid transparent;
+            border-top: 7px solid #2d2d3a;
+            margin: 0 auto;
+        }
+
+        /* 导航 */
+        .nav-area {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1.2rem;
+        }
+        .nav-area .nav-left { display: flex; align-items: center; gap: 0.6rem; }
+        .btn-prev {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            padding: 0.9rem 1.8rem;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.95rem; font-weight: 900;
+            color: var(--text-muted); background: #fff;
+            border: 2px solid var(--border); border-radius: 999px;
+            cursor: pointer; letter-spacing: 0.04em;
+            transition: all 0.3s ease;
+        }
+        .btn-prev:hover { color: var(--accent); border-color: var(--accent-light); transform: translateY(-2px); }
+        .btn-prev:active { transform: scale(0.97); }
+        .btn-prev.hidden-nav { visibility: hidden; }
+
+        .btn-back-article {
+            display: none;
+            align-items: center; gap: 0.3rem;
+            padding: 0.9rem 1.4rem;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.9rem; font-weight: 900;
+            color: var(--orange); background: #fff;
+            border: 2px solid #ffeaa7; border-radius: 999px;
+            cursor: pointer; letter-spacing: 0.04em;
+            transition: all 0.3s ease;
+        }
+        .btn-back-article.visible { display: inline-flex; }
+        .btn-back-article:hover { background: #fff8e1; border-color: var(--orange); transform: translateY(-2px); }
+
+        .btn-next {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.9rem 2rem;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1rem; font-weight: 900;
+            color: #fff; background: var(--accent);
+            border: none; border-radius: 999px;
+            cursor: pointer; letter-spacing: 0.04em;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+        .btn-next:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 8px 32px rgba(108, 92, 231, 0.35); }
+        .btn-next:active { transform: scale(0.97); }
+        .btn-next .next-arrow { font-size: 1.2rem; transition: transform 0.3s ease; }
+        .btn-next:hover .next-arrow { transform: translateX(4px); }
+        .btn-next.finish {
+            background: linear-gradient(135deg, var(--accent), #e74c3c);
+            box-shadow: 0 4px 20px rgba(108, 92, 231, 0.35);
+            animation: finishGlow 1.5s ease-in-out infinite;
+        }
+        @keyframes finishGlow {
+            0%, 100% { box-shadow: 0 4px 20px rgba(108, 92, 231, 0.35); }
+            50% { box-shadow: 0 8px 36px rgba(231, 76, 60, 0.5); }
+        }
+
+        /* ========== 挑战页 ========== */
+        .challenge-page {
+            display: none;
+            flex-direction: column; align-items: center;
+            width: 90%; max-width: 740px;
+            padding: 1.5rem 0 2rem;
+        }
+        .challenge-page.active { display: flex; }
+        .challenge-header { text-align: center; margin-bottom: 1.5rem; }
+        .challenge-header .challenge-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #e74c3c, #fd79a8);
+            color: #fff;
+            font-size: 0.85rem; font-weight: 900;
+            padding: 0.4rem 1.5rem;
+            border-radius: 999px; letter-spacing: 0.08em;
+            margin-bottom: 0.8rem;
+        }
+        .challenge-header h2 { font-size: 2rem; font-weight: 900; color: var(--text); line-height: 1.3; }
+        .challenge-header p { font-size: 0.95rem; font-weight: 700; color: var(--text-muted); margin-top: 0.3rem; }
+
+        .word-bank {
+            width: 100%;
+            background: var(--card-bg);
+            border: 1.5px solid var(--border);
+            border-radius: 1.5rem;
+            padding: 1.2rem 1.5rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+        }
+        .word-bank .bank-title {
+            font-size: 0.8rem; font-weight: 800;
+            color: var(--text-muted); letter-spacing: 0.08em;
+            text-transform: uppercase; margin-bottom: 0.6rem;
+        }
+        .word-bank .bank-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+        .bank-tag {
+            font-size: 0.75rem; font-weight: 800;
+            padding: 0.25rem 0.7rem;
+            border-radius: 999px;
+            background: #fff5f5; color: #e74c3c;
+            border: 1.5px solid #ffe0e0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .bank-tag {
+            transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .bank-tag:hover {
+            background: #ffe0e0;
+            transform: scale(1.08);
+            box-shadow: 0 2px 8px rgba(231, 76, 60, 0.15);
+        }
+
+        .article-card {
+            width: 100%;
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            border-radius: 2rem;
+            padding: 2.5rem 2rem;
+            box-shadow: var(--shadow-lg);
+            line-height: 2.1;
+            font-size: 1.05rem;
+            font-weight: 600;
+            text-align: left;
+        }
+        .article-card h3 { font-size: 1.3rem; font-weight: 900; margin-bottom: 1rem; color: var(--text); }
+        .article-card p { margin-bottom: 0.8rem; }
+
+        .article-card .word-highlight {
+            color: #e74c3c; font-weight: 900;
+            background: #fff5f5; padding: 0.15rem 0.35rem;
+            border-radius: 0.35rem;
+            border-bottom: 2px solid rgba(231, 76, 60, 0.3);
+            cursor: pointer; transition: all 0.2s ease;
+            position: relative;
+        }
+        .article-card .word-highlight {
+            transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .article-card .word-highlight:hover {
+            background: #ffe0e0;
+            box-shadow: 0 3px 12px rgba(231, 76, 60, 0.25);
+            transform: translateY(-2px) scale(1.03);
+        }
+        .article-card .word-highlight::after {
+            content: '📖'; font-size: 0.65rem;
+            position: absolute; top: -8px; right: -4px;
+            opacity: 0; transition: opacity 0.2s ease;
+        }
+        .article-card .word-highlight:hover::after { opacity: 1; }
+
+        .article-card .word-clickable { }
+
+        .challenge-nav { width: 100%; display: flex; justify-content: center; gap: 1rem; margin-top: 1.5rem; }
+        .btn-again {
+            padding: 0.9rem 2.5rem;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1rem; font-weight: 900;
+            color: #fff; background: var(--accent);
+            border: none; border-radius: 999px;
+            cursor: pointer; letter-spacing: 0.04em;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+        .btn-again:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(108, 92, 231, 0.35); }
+
+        /* ========== 完成页 ========== */
+        .complete-page {
+            display: none;
+            flex-direction: column; align-items: center;
+            gap: 2rem; text-align: center;
+            width: 90%; max-width: 500px;
+        }
+        .complete-page.active { display: flex; }
+        .complete-icon { font-size: 5rem; animation: bounce 0.6s ease infinite alternate; }
+        @keyframes bounce { 0% { transform: translateY(0); } 100% { transform: translateY(-15px); } }
+        .complete-page h2 { font-size: 2rem; font-weight: 900; color: var(--text); }
+        .complete-page .complete-stats { font-size: 1.05rem; font-weight: 700; color: var(--text-muted); line-height: 1.8; }
+        .complete-page .complete-stats strong { color: var(--accent); font-weight: 900; }
+        .btn-restart {
+            padding: 0.9rem 2.5rem;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1rem; font-weight: 900;
+            color: #fff; background: var(--accent);
+            border: none; border-radius: 999px;
+            cursor: pointer; letter-spacing: 0.04em;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+        .btn-restart:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(108, 92, 231, 0.35); }
+        .btn-restart-outline {
+            background: #fff !important; color: var(--text-muted) !important;
+            border: 2px solid var(--border) !important; box-shadow: none !important;
+        }
+
+        /* 响应式 */
+        @media (max-width: 600px) {
+            .cover-page h1 { font-size: 1.7rem; }
+            .word-english { font-size: 1.9rem; }
+            .word-english.phrase-text { font-size: 1.4rem; }
+            .word-card { padding: 1.5rem 1.2rem; }
+            .article-card { padding: 1.5rem 1.2rem; font-size: 0.9rem; }
+            .btn-prev, .btn-next { padding: 0.7rem 1.4rem; font-size: 0.85rem; }
+        }
+
+        /* ========== 选择弹窗 ========== */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.25s ease;
+        }
+        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+        .modal-card {
+            background: #fff;
+            border-radius: 2rem;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            max-width: 420px;
+            width: 90%;
+            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes slideUp {
+            0% { transform: translateY(40px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        .modal-card h3 {
+            font-size: 1.4rem; font-weight: 900;
+            color: var(--text); margin-bottom: 0.5rem;
+        }
+        .modal-card .modal-desc {
+            font-size: 0.85rem; font-weight: 700;
+            color: var(--text-muted); margin-bottom: 2rem;
+        }
+        .modal-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+        .modal-option {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.1rem 1.5rem;
+            border: 2px solid var(--border);
+            border-radius: 1.2rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            background: #fff;
+            text-align: left;
+            font-family: 'Nunito', sans-serif;
+        }
+        .modal-option:hover {
+            border-color: var(--accent-light);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px) scale(1.02);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .modal-option .opt-icon {
+            width: 50px; height: 50px;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            flex-shrink: 0;
+        }
+        .modal-option:nth-child(1) .opt-icon { background: #f3f0ff; }
+        .modal-option:nth-child(2) .opt-icon { background: #e6fffa; }
+        .modal-option .opt-info { flex: 1; }
+        .modal-option .opt-title {
+            font-size: 1rem; font-weight: 900;
+            color: var(--text); margin-bottom: 0.15rem;
+        }
+        .modal-option .opt-sub {
+            font-size: 0.78rem; font-weight: 700;
+            color: var(--text-muted);
+        }
+        .modal-close {
+            margin-top: 1.5rem;
+            padding: 0.5rem 1.5rem;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.85rem; font-weight: 800;
+            color: var(--text-muted); background: none;
+            border: none; cursor: pointer;
+        }
+        .modal-close:hover { color: var(--text); }
+
+        /* ========== 听力页 ========== */
+        .listen-page {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 90%;
+            max-width: 700px;
+            padding: 1.5rem 0 2rem;
+        }
+        .listen-page.active { display: flex; }
+
+        .listen-header {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.2rem;
+        }
+        .listen-source-tag {
+            display: inline-block;
+            font-size: 0.75rem; font-weight: 900;
+            padding: 0.3rem 0.9rem;
+            border-radius: 999px;
+            letter-spacing: 0.06em;
+        }
+        .listen-source-tag.real { background: #ffe0e0; color: #c0392b; }
+        .listen-source-tag.mock { background: #fff3e0; color: #e67e22; }
+
+        .listen-card {
+            width: 100%;
+            background: var(--card-bg);
+            border: 1.5px solid var(--border);
+            border-radius: 2rem;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 1rem;
+        }
+        .listen-card h3 {
+            font-size: 1.2rem; font-weight: 900;
+            color: var(--text); margin-bottom: 0.5rem;
+        }
+        .listen-card .listen-instruction {
+            font-size: 0.85rem; font-weight: 700;
+            color: var(--text-muted); margin-bottom: 1.2rem;
+            line-height: 1.5;
+        }
+        .listen-questions {
+            background: #fafafa;
+            border-radius: 1rem;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 1.2rem;
+        }
+        .listen-questions h4 {
+            font-size: 0.85rem; font-weight: 900;
+            color: var(--accent); margin-bottom: 0.8rem;
+            letter-spacing: 0.06em;
+        }
+        .listen-questions .q-item {
+            font-size: 0.9rem; font-weight: 700;
+            color: var(--text); margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+        .listen-questions .q-item .q-num {
+            display: inline-block;
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            font-size: 0.7rem; font-weight: 900;
+            text-align: center; line-height: 24px;
+            margin-right: 0.4rem;
+        }
+
+        .listen-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+        .btn-listen-play {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.8rem 2rem;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1rem; font-weight: 900;
+            color: #fff; background: var(--accent);
+            border: none; border-radius: 999px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+        .btn-listen-play:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(108, 92, 231, 0.35); }
+        .btn-listen-play.playing {
+            background: #e74c3c;
+            animation: finishGlow 1.5s ease-in-out infinite;
+        }
+        .btn-toggle-transcript {
+            padding: 0.8rem 1.5rem;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.9rem; font-weight: 900;
+            color: var(--accent); background: #fff;
+            border: 2px solid var(--accent-light);
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .btn-toggle-transcript:hover {
+            background: #f8f7ff;
+            transform: translateY(-2px);
+        }
+
+        .listen-transcript {
+            display: none;
+            width: 100%;
+            background: var(--card-bg);
+            border: 1.5px solid var(--border);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            line-height: 2;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: left;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .listen-transcript.visible { display: block; animation: fadeIn 0.3s ease; }
+
+        .listen-transcript .t-sentence {
+            padding: 0.3rem 0.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: default;
+            display: inline;
+        }
+        .listen-transcript .t-sentence.active {
+            background: #dbe9ff;
+            color: #1a56db;
+            font-weight: 800;
+            box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.12);
+            transform: scale(1.02);
+        }
+        .listen-transcript .word-clickable { }
+
+        .listen-nav {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        /* 听力历史 */
+        .history-tabs {
+            display: flex;
+            gap: 0.3rem;
+            margin-bottom: 1rem;
+            background: #eeeef2;
+            border-radius: 999px;
+            padding: 0.25rem;
+        }
+        .history-tab {
+            flex: 1;
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            border: none;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.82rem; font-weight: 800;
+            cursor: pointer;
+            background: transparent;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+        }
+        .history-tab.active {
+            background: #fff;
+            color: var(--accent);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== 词译弹窗 ==================== -->
+    <div class="word-tooltip" id="wordTooltip">
+        <div class="word-tooltip-inner">
+            <div class="tooltip-original" id="tooltipOriginal"></div>
+            <div id="tooltipTranslation"></div>
+        </div>
+        <div class="word-tooltip-arrow"></div>
+    </div>
+
+    <!-- ==================== 封面页 ==================== -->
+    <div class="cover-page" id="coverPage">
+        <h1>你的英语学习之旅</h1>
+        <div class="btn-wrapper">
+            <div class="btn-ring"></div><div class="btn-ring"></div>
+            <button class="btn-start" onclick="startNewSession()">
+                <span>开始学习</span><span class="btn-arrow">→</span>
+            </button>
+        </div>
+
+        <!-- 历史记录 -->
+        <div class="history-section">
+            <div class="history-header">
+                <h3>📋 历史学习记录 <span class="history-count" id="historyCount">0</span></h3>
+            </div>
+            <div class="history-tabs">
+                <button class="history-tab active" id="tabVocab" onclick="switchHistoryTab('vocab')">📖 词汇学习</button>
+                <button class="history-tab" id="tabListen" onclick="switchHistoryTab('listen')">🎧 听力练习</button>
+            </div>
+            <div class="history-list" id="historyList">
+                <div class="history-empty">
+                    <div class="empty-icon">📭</div>
+                    <div>还没有学习记录<br>点击上方按钮开始你的第一次学习吧！</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 听力练习页 ==================== -->
+    <div class="listen-page" id="listenPage">
+        <div class="listen-header">
+            <span class="listen-source-tag" id="listenSourceTag"></span>
+            <span style="font-size:0.8rem;font-weight:800;color:var(--text-muted);" id="listenPassageId"></span>
+            <button class="exit-btn" onclick="goToCover()">✕ 退出</button>
+        </div>
+        <div class="listen-card">
+            <h3 id="listenTitle"></h3>
+            <div class="listen-instruction" id="listenInstruction"></div>
+            <div class="listen-questions" id="listenQuestions"></div>
+            <div class="listen-controls">
+                <button class="btn-listen-play" id="btnListenPlay" onclick="toggleListenPlay()">
+                    🔊 <span id="btnListenLabel">播放听力</span>
+                </button>
+                <button class="btn-toggle-transcript" id="btnToggleTranscript" onclick="toggleTranscript()">
+                    📄 显示原文
+                </button>
+            </div>
+        </div>
+        <div class="listen-transcript" id="listenTranscript"></div>
+        <div class="listen-nav">
+            <button class="btn-again" onclick="goToCover()">🔄 返回主页</button>
+        </div>
+    </div>
+
+    <!-- ==================== 学习页 ==================== -->
+    <div class="learn-page" id="learnPage">
+        <div class="top-bar">
+            <span class="word-counter" id="wordCounterLabel">词汇 <strong id="currentNum">1</strong> / 30</span>
+            <div class="mini-progress-wrapper">
+                <div class="mini-progress" id="miniProgressBar" onclick="toggleNumberGrid(event)">
+                    <div class="mini-progress-fill" id="miniProgressFill" style="width:3.33%"></div>
+                </div>
+                <div class="number-grid-popup" id="numberGrid"></div>
+            </div>
+            <button class="exit-btn" onclick="goToCover()">✕ 退出</button>
+        </div>
+        <div class="word-card">
+            <div class="type-tag" id="typeTag"></div>
+            <div class="word-english-row">
+                <div class="word-english" id="wordEnglish"></div>
+                <button class="speaker-btn speaker-btn-lg" id="speakerWord" onclick="speakWord()" title="朗读单词">🔊</button>
+            </div>
+            <div class="word-phonetic" id="wordPhonetic"></div>
+            <div class="section-label">📖 English Definition</div>
+            <div class="en-definition-row">
+                <div class="en-definition" id="enDefinition"></div>
+                <button class="speaker-btn speaker-btn-sm" id="speakerDef" onclick="speakDefinition()" title="朗读释义">🔊</button>
+            </div>
+            <div class="section-label">🇨🇳 中文释义</div>
+            <div class="cn-definition-wrapper" id="cnWrapper">
+                <span class="cn-definition blurred" id="cnDefinition"></span>
+                <div class="doodle-cover" id="doodleCover"></div>
+                <button class="reveal-btn" id="revealBtn" onclick="toggleChinese()">👀 显示</button>
+            </div>
+            <div class="example-section">
+                <div class="section-label">💬 Example Sentence</div>
+                <div class="example-box">
+                    <div class="example-en-row">
+                        <div class="example-en" id="exampleEn"></div>
+                        <button class="speaker-btn speaker-btn-sm" id="speakerExample" onclick="speakExample()" title="朗读例句">🔊</button>
+                    </div>
+                    <div class="example-cn-wrapper" id="exampleCnWrapper">
+                        <span class="example-cn blurred" id="exampleCn"></span>
+                        <div class="doodle-cover-example" id="doodleCoverExample"></div>
+                        <button class="reveal-btn-example" id="revealBtnExample" onclick="toggleExampleCn()">👀 显示翻译</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="nav-area">
+            <div class="nav-left">
+                <button class="btn-prev hidden-nav" id="btnPrev" onclick="prevWord()">← 上一个</button>
+                <button class="btn-back-article" id="btnBackArticle" onclick="backToArticle()">📄 返回文章</button>
+            </div>
+            <div class="nav-right">
+                <button class="btn-next" id="btnNext" onclick="nextWord()">
+                    <span id="nextLabel">下一个</span><span class="next-arrow">→</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 最终挑战页 ==================== -->
+    <div class="challenge-page" id="challengePage">
+        <div class="challenge-header">
+            <div class="challenge-badge">🏆 FINAL CHALLENGE</div>
+            <h2>最终挑战：阅读理解</h2>
+            <p>红色词汇点击可跳转学习 · 黑色词汇点击查看翻译</p>
+        </div>
+        <div class="word-bank">
+            <div class="bank-title">📋 已学词汇/短语（点击跳转学习）</div>
+            <div class="bank-tags" id="bankTags"></div>
+        </div>
+        <div class="article-speaker-row">
+            <button class="speaker-btn" id="speakerArticle" onclick="speakArticle()" title="朗读全文">🔊</button>
+            <span style="font-size:0.85rem;font-weight:700;color:var(--text-muted);">点击喇叭朗读全文</span>
+            <span style="font-size:0.75rem;font-weight:600;color:var(--accent-light);display:none;" id="articleSpeakingHint">正在朗读中…</span>
+        </div>
+        <div class="article-card" id="articleCard"></div>
+        <div class="challenge-nav">
+            <button class="btn-again" onclick="restart()">🔄 返回主页</button>
+        </div>
+    </div>
+
+    <!-- ==================== 完成页 ==================== -->
+    <div class="complete-page" id="completePage">
+        <div class="complete-icon">🎉</div>
+        <h2>太棒了！学习完成！</h2>
+        <div class="complete-stats">你已完成 <strong>30</strong> 个雅思高频词汇与短语的学习<br>本次学习已保存到历史记录 ✨</div>
+        <button class="btn-restart" onclick="goToChallenge()">🚀 进入最终挑战</button>
+        <button class="btn-restart btn-restart-outline" onclick="restart()">🔄 返回主页</button>
+    </div>
+
+    <script src="dictionary.js"></script>
+    <script>
+        // ========== 超大词汇库 (120个) ==========
+        const masterVocabulary = [
+            // 第一批 1-30: 学术核心动词与名词
+            { en: "advocate", type: "word", pos: "verb & noun", phonetic: "/ˈædvəkeɪt/", enDef: "To publicly support a policy or idea.", cn: "倡导，拥护", exampleEn: "The report advocates major changes to the education system.", exampleCn: "这份报告倡导对教育系统进行重大改革。" },
+            { en: "allocate", type: "word", pos: "verb", phonetic: "/ˈæləkeɪt/", enDef: "To give out resources or money for a specific purpose.", cn: "分配，拨给", exampleEn: "The government has allocated funds to build new hospitals.", exampleCn: "政府已拨款建设新医院。" },
+            { en: "undermine", type: "word", pos: "verb", phonetic: "/ˌʌndəˈmaɪn/", enDef: "To gradually weaken or damage something.", cn: "削弱，损害", exampleEn: "Constant criticism can undermine a child's confidence.", exampleCn: "持续的批评会削弱孩子的自信心。" },
+            { en: "in accordance with", type: "phrase", pos: "phrase", phonetic: "/ɪn əˈkɔːdəns wɪð/", enDef: "Following or obeying a rule, law, or request.", cn: "根据，依照", exampleEn: "The project was completed in accordance with the guidelines.", exampleCn: "该项目依照指导方针完成。" },
+            { en: "diminish", type: "word", pos: "verb", phonetic: "/dɪˈmɪnɪʃ/", enDef: "To become or make something smaller or less important.", cn: "减少，降低", exampleEn: "The pain will gradually diminish over the next few days.", exampleCn: "疼痛将在接下来的几天里逐渐减轻。" },
+            { en: "as opposed to", type: "phrase", pos: "phrase", phonetic: "/æz əˈpəʊzd tə/", enDef: "Used to contrast two different things.", cn: "与…相对，而不是", exampleEn: "She prefers online learning as opposed to classroom study.", exampleCn: "她更喜欢在线学习，而不是课堂教学。" },
+            { en: "consensus", type: "word", pos: "noun", phonetic: "/kənˈsensəs/", enDef: "A general agreement among a group of people.", cn: "共识，一致意见", exampleEn: "There is a growing consensus that climate change is real.", exampleCn: "人们越来越一致认为气候变化是真实的。" },
+            { en: "by virtue of", type: "phrase", pos: "phrase", phonetic: "/baɪ ˈvɜːtʃuː əv/", enDef: "Because of; as a result of a particular quality.", cn: "由于，凭借", exampleEn: "She got the job by virtue of her extensive experience.", exampleCn: "她凭借丰富的经验获得了这份工作。" },
+            { en: "elaborate", type: "word", pos: "verb & adj", phonetic: "/ɪˈlæbərət/", enDef: "To explain something in more detail.", cn: "详细说明；精心的", exampleEn: "Could you elaborate on your proposal for the new project?", exampleCn: "你能详细说明一下你关于新项目的提案吗？" },
+            { en: "steer clear of", type: "phrase", pos: "phrase", phonetic: "/stɪə klɪə əv/", enDef: "To avoid someone or something completely.", cn: "避开，远离", exampleEn: "Investors should steer clear of risky financial products.", exampleCn: "投资者应避开高风险的金融产品。" },
+            { en: "exploit", type: "word", pos: "verb", phonetic: "/ɪkˈsplɔɪt/", enDef: "To use something unfairly for your own benefit.", cn: "剥削，利用", exampleEn: "Some companies exploit workers by paying very low wages.", exampleCn: "一些公司通过支付极低的工资来剥削工人。" },
+            { en: "in the wake of", type: "phrase", pos: "phrase", phonetic: "/ɪn ðə weɪk əv/", enDef: "Following soon after an important event.", cn: "随着…而来，在…之后", exampleEn: "Many businesses closed in the wake of the economic crisis.", exampleCn: "经济危机之后，许多企业倒闭了。" },
+            { en: "inhibit", type: "word", pos: "verb", phonetic: "/ɪnˈhɪbɪt/", enDef: "To prevent or slow down a process or action.", cn: "抑制，阻碍", exampleEn: "Too many rules can inhibit creativity in the workplace.", exampleCn: "太多的规则会抑制工作场所的创造力。" },
+            { en: "at the mercy of", type: "phrase", pos: "phrase", phonetic: "/æt ðə ˈmɜːsi əv/", enDef: "Completely controlled by someone or something.", cn: "完全受…支配，任由…摆布", exampleEn: "Small farmers are often at the mercy of market prices.", exampleCn: "小农户常常受市场价格的支配。" },
+            { en: "intrinsic", type: "word", pos: "adjective", phonetic: "/ɪnˈtrɪnsɪk/", enDef: "Being a natural and essential part of something.", cn: "固有的，内在的", exampleEn: "Curiosity is an intrinsic part of human nature.", exampleCn: "好奇心是人性中固有的一部分。" },
+            { en: "on the grounds that", type: "phrase", pos: "phrase", phonetic: "/ɒn ðə ɡraʊndz ðæt/", enDef: "For the reason that; because.", cn: "以…为由，因为", exampleEn: "The plan was rejected on the grounds that it cost too much.", exampleCn: "该计划因成本过高而被拒绝。" },
+            { en: "mitigate", type: "word", pos: "verb", phonetic: "/ˈmɪtɪɡeɪt/", enDef: "To make something less harmful or serious.", cn: "减轻，缓和", exampleEn: "Planting trees can help mitigate the effects of pollution.", exampleCn: "植树有助于减轻污染的影响。" },
+            { en: "in light of", type: "phrase", pos: "phrase", phonetic: "/ɪn laɪt əv/", enDef: "Because of new information or a recent event.", cn: "鉴于，考虑到", exampleEn: "In light of recent research, the guidelines have been updated.", exampleCn: "鉴于最近的研究，指南已经更新。" },
+            { en: "offset", type: "word", pos: "verb", phonetic: "/ˈɒfset/", enDef: "To balance the effect of something with an opposite effect.", cn: "抵消，补偿", exampleEn: "The extra cost is offset by long-term energy savings.", exampleCn: "额外的成本被长期的能源节省所抵消。" },
+            { en: "lag behind", type: "phrase", pos: "phrase", phonetic: "/læɡ bɪˈhaɪnd/", enDef: "To move or develop more slowly than others.", cn: "落后，滞后", exampleEn: "This country still lags behind in renewable energy use.", exampleCn: "这个国家在可再生能源使用方面仍然落后。" },
+            { en: "predominantly", type: "word", pos: "adverb", phonetic: "/prɪˈdɒmɪnəntli/", enDef: "Mainly; for the most part.", cn: "主要地，占主导地", exampleEn: "The population is predominantly under the age of thirty.", exampleCn: "人口主要是三十岁以下的年轻人。" },
+            { en: "fall short of", type: "phrase", pos: "phrase", phonetic: "/fɔːl ʃɔːt əv/", enDef: "To fail to reach a goal or standard.", cn: "未达到，达不到", exampleEn: "The project fell short of its fundraising target.", exampleCn: "该项目未能达到筹款目标。" },
+            { en: "prone to", type: "phrase", pos: "phrase", phonetic: "/prəʊn tə/", enDef: "Likely to suffer from or do something bad.", cn: "易于…的，倾向于…的", exampleEn: "This area is prone to flooding during heavy rain.", exampleCn: "这个地区在大雨期间容易发生洪水。" },
+            { en: "retain", type: "word", pos: "verb", phonetic: "/rɪˈteɪn/", enDef: "To keep or continue to have something.", cn: "保留，保持", exampleEn: "It is important to retain skilled workers in the company.", exampleCn: "留住公司里的技术工人很重要。" },
+            { en: "stem from", type: "phrase", pos: "phrase", phonetic: "/stem frɒm/", enDef: "To be caused by or come from a particular thing.", cn: "源于，由…引起", exampleEn: "Most health problems stem from poor diet and lack of exercise.", exampleCn: "大多数健康问题源于不良饮食和缺乏锻炼。" },
+            { en: "stringent", type: "word", pos: "adjective", phonetic: "/ˈstrɪndʒənt/", enDef: "Very strict or severe, especially about rules.", cn: "严格的，严厉的", exampleEn: "The country has introduced stringent new environmental laws.", exampleCn: "该国出台了严格的新环境法律。" },
+            { en: "shed light on", type: "phrase", pos: "phrase", phonetic: "/ʃed laɪt ɒn/", enDef: "To make something easier to understand.", cn: "阐明，揭示", exampleEn: "This study sheds light on how memory works.", exampleCn: "这项研究揭示了记忆是如何运作的。" },
+            { en: "trigger", type: "word", pos: "verb & noun", phonetic: "/ˈtrɪɡə/", enDef: "To cause something to start or happen suddenly.", cn: "触发，引起", exampleEn: "The announcement triggered a sharp fall in stock prices.", exampleCn: "该公告引发了股价的急剧下跌。" },
+            { en: "utilize", type: "word", pos: "verb", phonetic: "/ˈjuːtɪlaɪz/", enDef: "To use something in an effective way.", cn: "利用，使用", exampleEn: "We should utilize solar power more efficiently.", exampleCn: "我们应该更有效地利用太阳能。" },
+            { en: "with the exception of", type: "phrase", pos: "phrase", phonetic: "/wɪð ðə ɪkˈsepʃən əv/", enDef: "Not including one particular person or thing.", cn: "除…之外", exampleEn: "With the exception of Monday, the store is open every day.", exampleCn: "除周一外，商店每天营业。" },
+
+            // 第二批 31-60: 学术形容词与话题词汇
+            { en: "albeit", type: "word", pos: "conjunction", phonetic: "/ɔːlˈbiːɪt/", enDef: "Although; even though.", cn: "虽然，尽管", exampleEn: "It was an interesting, albeit difficult, course to complete.", exampleCn: "这门课虽然很难，但很有意思。" },
+            { en: "back up", type: "phrase", pos: "phrase", phonetic: "/bæk ʌp/", enDef: "To provide evidence to support an idea or claim.", cn: "支持，证实", exampleEn: "You need data to back up your argument.", exampleCn: "你需要数据来支持你的论点。" },
+            { en: "compelling", type: "word", pos: "adjective", phonetic: "/kəmˈpelɪŋ/", enDef: "Very convincing or so interesting that you must pay attention.", cn: "令人信服的；引人入胜的", exampleEn: "The lawyer presented a compelling case for the defence.", exampleCn: "律师为辩方提出了一个令人信服的论据。" },
+            { en: "come into force", type: "phrase", pos: "phrase", phonetic: "/kʌm ˈɪntə fɔːs/", enDef: "To officially start to apply (for a law or rule).", cn: "生效，开始实施", exampleEn: "The new tax law will come into force next January.", exampleCn: "新税法将于明年一月生效。" },
+            { en: "detrimental", type: "word", pos: "adjective", phonetic: "/ˌdetrɪˈmentl/", enDef: "Causing harm or damage.", cn: "有害的，不利的", exampleEn: "Too much screen time can be detrimental to young children.", exampleCn: "过多的屏幕时间对幼儿可能是有害的。" },
+            { en: "do away with", type: "phrase", pos: "phrase", phonetic: "/duː əˈweɪ wɪð/", enDef: "To get rid of or stop using something.", cn: "废除，取消", exampleEn: "Some people think we should do away with cash payments.", exampleCn: "一些人认为我们应该废除现金支付。" },
+            { en: "empirical", type: "word", pos: "adjective", phonetic: "/ɪmˈpɪrɪkl/", enDef: "Based on real experience or data, not just theory.", cn: "以经验为依据的，实证的", exampleEn: "There is no empirical evidence to support this claim.", exampleCn: "没有实证支持这一说法。" },
+            { en: "exempt from", type: "phrase", pos: "phrase", phonetic: "/ɪɡˈzempt frɒm/", enDef: "Free from a duty or rule that others must follow.", cn: "免除，豁免", exampleEn: "Charities are exempt from paying most taxes.", exampleCn: "慈善机构免缴大部分税款。" },
+            { en: "feasible", type: "word", pos: "adjective", phonetic: "/ˈfiːzəbl/", enDef: "Possible and likely to be achieved.", cn: "可行的，可能的", exampleEn: "Is it feasible to complete the project within six months?", exampleCn: "在六个月内完成这个项目可行吗？" },
+            { en: "gain traction", type: "phrase", pos: "phrase", phonetic: "/ɡeɪn ˈtrækʃən/", enDef: "To become more popular or accepted.", cn: "获得支持，越来越受欢迎", exampleEn: "Electric vehicles are starting to gain traction worldwide.", exampleCn: "电动汽车在全球范围内开始获得越来越多的认可。" },
+            { en: "hinder", type: "word", pos: "verb", phonetic: "/ˈhɪndə/", enDef: "To make it more difficult for something to happen.", cn: "阻碍，妨碍", exampleEn: "A lack of funding is hindering medical research progress.", exampleCn: "资金短缺正在阻碍医学研究的进展。" },
+            { en: "in conjunction with", type: "phrase", pos: "phrase", phonetic: "/ɪn kənˈdʒʌŋkʃən wɪð/", enDef: "Together with something else.", cn: "与…一起，连同", exampleEn: "The drug works best in conjunction with a healthy diet.", exampleCn: "这种药物与健康饮食一起使用效果最好。" },
+            { en: "indispensable", type: "word", pos: "adjective", phonetic: "/ˌɪndɪˈspensəbl/", enDef: "Absolutely necessary; cannot be done without.", cn: "不可或缺的", exampleEn: "Computers have become indispensable in modern education.", exampleCn: "计算机在现代教育中已变得不可或缺。" },
+            { en: "keep at bay", type: "phrase", pos: "phrase", phonetic: "/kiːp æt beɪ/", enDef: "To prevent something bad from affecting you.", cn: "阻止，抵挡", exampleEn: "Regular exercise helps keep many diseases at bay.", exampleCn: "定期锻炼有助于抵御许多疾病。" },
+            { en: "lucrative", type: "word", pos: "adjective", phonetic: "/ˈluːkrətɪv/", enDef: "Producing a lot of money; profitable.", cn: "赚钱的，有利可图的", exampleEn: "The tech industry remains one of the most lucrative fields.", exampleCn: "科技行业仍然是最赚钱的领域之一。" },
+            { en: "make strides", type: "phrase", pos: "phrase", phonetic: "/meɪk straɪdz/", enDef: "To make good progress in a particular area.", cn: "取得进展，进步", exampleEn: "The country has made great strides in reducing poverty.", exampleCn: "该国在减少贫困方面取得了巨大进展。" },
+            { en: "negligible", type: "word", pos: "adjective", phonetic: "/ˈneɡlɪdʒəbl/", enDef: "So small or unimportant that it is not worth considering.", cn: "微不足道的，可以忽略的", exampleEn: "The risk from this procedure is negligible.", exampleCn: "这个程序的风险微乎其微。" },
+            { en: "on the verge of", type: "phrase", pos: "phrase", phonetic: "/ɒn ðə vɜːdʒ əv/", enDef: "Very close to doing or experiencing something.", cn: "濒临，即将", exampleEn: "The species is on the verge of extinction.", exampleCn: "这个物种濒临灭绝。" },
+            { en: "paradigm", type: "word", pos: "noun", phonetic: "/ˈpærədaɪm/", enDef: "A typical example or model of something.", cn: "范例，范式", exampleEn: "The internet created a new paradigm for communication.", exampleCn: "互联网为通信创造了一种新范式。" },
+            { en: "prey on", type: "phrase", pos: "phrase", phonetic: "/preɪ ɒn/", enDef: "To harm or take advantage of weaker people.", cn: "捕食；欺负，利用", exampleEn: "Scammers often prey on elderly people.", exampleCn: "诈骗者经常利用老年人。" },
+            { en: "profound", type: "word", pos: "adjective", phonetic: "/prəˈfaʊnd/", enDef: "Very deep and having a strong effect.", cn: "深远的，深刻的", exampleEn: "The internet has had a profound impact on society.", exampleCn: "互联网对社会产生了深远的影响。" },
+            { en: "resort to", type: "phrase", pos: "phrase", phonetic: "/rɪˈzɔːt tə/", enDef: "To do something bad as a last option.", cn: "诉诸，采取（不好的手段）", exampleEn: "Some students resort to cheating when exams are too hard.", exampleCn: "考试太难时，一些学生就会诉诸作弊。" },
+            { en: "scrutiny", type: "word", pos: "noun", phonetic: "/ˈskruːtɪni/", enDef: "Careful and detailed examination of something.", cn: "仔细审查，审视", exampleEn: "The company's finances are under close scrutiny.", exampleCn: "该公司的财务状况正受到严密审查。" },
+            { en: "sweeping", type: "word", pos: "adjective", phonetic: "/ˈswiːpɪŋ/", enDef: "Having a very wide and significant effect.", cn: "广泛的，彻底的", exampleEn: "The government announced sweeping reforms to healthcare.", exampleCn: "政府宣布了对医疗保健的全面改革。" },
+            { en: "take a toll on", type: "phrase", pos: "phrase", phonetic: "/teɪk ə təʊl ɒn/", enDef: "To have a bad effect on someone or something over time.", cn: "对…造成损害/影响", exampleEn: "Long working hours can take a toll on your health.", exampleCn: "长时间的工作会对你的健康造成损害。" },
+            { en: "unprecedented", type: "word", pos: "adjective", phonetic: "/ʌnˈpresɪdentɪd/", enDef: "Never having happened or existed before.", cn: "前所未有的，史无前例的", exampleEn: "The pandemic caused an unprecedented global lockdown.", exampleCn: "疫情导致了史无前例的全球封锁。" },
+            { en: "veer away from", type: "phrase", pos: "phrase", phonetic: "/vɪə əˈweɪ frɒm/", enDef: "To change direction and move away from something.", cn: "偏离，转向", exampleEn: "The discussion veered away from the main topic.", exampleCn: "讨论偏离了主题。" },
+            { en: "viable", type: "word", pos: "adjective", phonetic: "/ˈvaɪəbl/", enDef: "Able to work successfully; practical and achievable.", cn: "可行的，能成功的", exampleEn: "Solar power is now a viable alternative to fossil fuels.", exampleCn: "太阳能现在是化石燃料的可行替代品。" },
+            { en: "vulnerable", type: "word", pos: "adjective", phonetic: "/ˈvʌlnərəbl/", enDef: "Easily hurt, attacked, or affected by something bad.", cn: "脆弱的，易受伤害的", exampleEn: "Children are particularly vulnerable to online dangers.", exampleCn: "儿童特别容易受到网络危险的伤害。" },
+            { en: "wreak havoc on", type: "phrase", pos: "phrase", phonetic: "/riːk ˈhævək ɒn/", enDef: "To cause a lot of damage or problems.", cn: "对…造成严重破坏", exampleEn: "The storm wreaked havoc on the coastal villages.", exampleCn: "暴风雨对沿海村庄造成了严重破坏。" },
+
+            // 第三批 61-90: 雅思写作高分词汇与短语
+            { en: "accountable", type: "word", pos: "adjective", phonetic: "/əˈkaʊntəbl/", enDef: "Having to explain your actions and accept responsibility.", cn: "负有责任的", exampleEn: "Politicians should be accountable to the public for their actions.", exampleCn: "政治家应对公众负起他们行为的责任。" },
+            { en: "at odds with", type: "phrase", pos: "phrase", phonetic: "/æt ɒdz wɪð/", enDef: "In disagreement or conflict with something.", cn: "与…不一致，与…相矛盾", exampleEn: "His views are at odds with the latest scientific findings.", exampleCn: "他的观点与最新的科学发现不一致。" },
+            { en: "burden", type: "word", pos: "noun & verb", phonetic: "/ˈbɜːdn/", enDef: "A heavy load or responsibility that causes worry.", cn: "负担，重担", exampleEn: "The rising cost of healthcare places a burden on families.", exampleCn: "不断上涨的医疗费用给家庭带来了负担。" },
+            { en: "bring to light", type: "phrase", pos: "phrase", phonetic: "/brɪŋ tə laɪt/", enDef: "To reveal or discover something previously hidden.", cn: "揭露，发现", exampleEn: "The investigation brought to light serious safety problems.", exampleCn: "调查揭露了严重的安全问题。" },
+            { en: "cognitive", type: "word", pos: "adjective", phonetic: "/ˈkɒɡnɪtɪv/", enDef: "Relating to thinking, learning, and understanding.", cn: "认知的", exampleEn: "Playing chess can improve cognitive skills in children.", exampleCn: "下棋可以提高儿童的认知能力。" },
+            { en: "confine to", type: "phrase", pos: "phrase", phonetic: "/kənˈfaɪn tə/", enDef: "To limit something to a particular area or group.", cn: "限制在…范围内", exampleEn: "The problem is not confined to big cities.", exampleCn: "这个问题不仅限于大城市。" },
+            { en: "deprive of", type: "phrase", pos: "phrase", phonetic: "/dɪˈpraɪv əv/", enDef: "To take away something that someone needs.", cn: "剥夺，使丧失", exampleEn: "No child should be deprived of the right to education.", exampleCn: "任何儿童都不应该被剥夺受教育的权利。" },
+            { en: "deteriorate", type: "word", pos: "verb", phonetic: "/dɪˈtɪəriəreɪt/", enDef: "To become worse in quality or condition over time.", cn: "恶化，变坏", exampleEn: "Air quality has deteriorated rapidly in many cities.", exampleCn: "许多城市的空气质量迅速恶化。" },
+            { en: "disparity", type: "word", pos: "noun", phonetic: "/dɪˈspærɪti/", enDef: "A big difference between two or more groups.", cn: "差距，不平等", exampleEn: "There is a growing disparity between rich and poor.", exampleCn: "贫富之间的差距越来越大。" },
+            { en: "dispense with", type: "phrase", pos: "phrase", phonetic: "/dɪˈspens wɪð/", enDef: "To get rid of or stop using something unnecessary.", cn: "摒弃，省去", exampleEn: "Many offices have dispensed with paper documents entirely.", exampleCn: "许多办公室已完全摒弃了纸质文件。" },
+            { en: "endorse", type: "word", pos: "verb", phonetic: "/ɪnˈdɔːs/", enDef: "To publicly support or approve of something.", cn: "支持，赞同", exampleEn: "The proposal was endorsed by a majority of committee members.", exampleCn: "该提案得到了大多数委员会成员的支持。" },
+            { en: "factor in", type: "phrase", pos: "phrase", phonetic: "/ˈfæktə ɪn/", enDef: "To include something when calculating or planning.", cn: "把…考虑在内", exampleEn: "You need to factor in the cost of living when comparing salaries.", exampleCn: "比较工资时需要把生活成本考虑在内。" },
+            { en: "genuinely", type: "word", pos: "adverb", phonetic: "/ˈdʒenjuɪnli/", enDef: "In a real and sincere way; truly.", cn: "真正地，真诚地", exampleEn: "She is genuinely interested in helping others succeed.", exampleCn: "她真诚地希望帮助他人成功。" },
+            { en: "go hand in hand with", type: "phrase", pos: "phrase", phonetic: "/ɡəʊ hænd ɪn hænd wɪð/", enDef: "To be closely connected with something else.", cn: "与…密切相关", exampleEn: "Economic growth often goes hand in hand with innovation.", exampleCn: "经济增长往往与创新密切相关。" },
+            { en: "jeopardize", type: "word", pos: "verb", phonetic: "/ˈdʒepədaɪz/", enDef: "To put something at risk of being harmed or lost.", cn: "危及，损害", exampleEn: "A single mistake could jeopardize the entire mission.", exampleCn: "一个错误就可能危及整个任务。" },
+            { en: "in line with", type: "phrase", pos: "phrase", phonetic: "/ɪn laɪn wɪð/", enDef: "Following or agreeing with a rule, standard, or idea.", cn: "符合，与…一致", exampleEn: "The new policy is in line with international standards.", exampleCn: "新政策符合国际标准。" },
+            { en: "manifest", type: "word", pos: "verb & adj", phonetic: "/ˈmænɪfest/", enDef: "To show or appear clearly.", cn: "显示，显现；明显的", exampleEn: "The symptoms usually manifest within a few days of infection.", exampleCn: "症状通常在感染后几天内显现。" },
+            { en: "on no account", type: "phrase", pos: "phrase", phonetic: "/ɒn nəʊ əˈkaʊnt/", enDef: "Used to emphasize that something must never happen.", cn: "绝不，无论如何都不", exampleEn: "On no account should you share your password with anyone.", exampleCn: "你绝不应当与任何人分享你的密码。" },
+            { en: "plausible", type: "word", pos: "adjective", phonetic: "/ˈplɔːzəbl/", enDef: "Seeming reasonable or likely to be true.", cn: "合理的，似乎可信的", exampleEn: "The scientist offered a plausible explanation for the results.", exampleCn: "科学家对结果给出了一个合理的解释。" },
+            { en: "pave the way for", type: "phrase", pos: "phrase", phonetic: "/peɪv ðə weɪ fə/", enDef: "To make it possible for something to happen later.", cn: "为…铺平道路", exampleEn: "Early research paved the way for modern medicine.", exampleCn: "早期的研究为现代医学铺平了道路。" },
+            { en: "prevalent", type: "word", pos: "adjective", phonetic: "/ˈprevələnt/", enDef: "Very common in a particular place or at a particular time.", cn: "普遍的，盛行的", exampleEn: "Obesity is more prevalent now than ever before.", exampleCn: "肥胖症现在比以往任何时候都更加普遍。" },
+            { en: "put something down to", type: "phrase", pos: "phrase", phonetic: "/pʊt daʊn tə/", enDef: "To believe something is caused by a particular thing.", cn: "把…归因于", exampleEn: "His success can be put down to hard work and determination.", exampleCn: "他的成功可以归因于努力和决心。" },
+            { en: "repercussion", type: "word", pos: "noun", phonetic: "/ˌriːpəˈkʌʃən/", enDef: "A bad effect caused by an action or event.", cn: "后果，不良影响", exampleEn: "The economic repercussions of the crisis are still being felt.", exampleCn: "这场危机的经济后果仍在持续。" },
+            { en: "sceptical", type: "word", pos: "adjective", phonetic: "/ˈskeptɪkl/", enDef: "Having doubts about something that others believe.", cn: "怀疑的", exampleEn: "Many experts remain sceptical about the new technology's claims.", exampleCn: "许多专家对新技术的说法仍持怀疑态度。" },
+            { en: "set in motion", type: "phrase", pos: "phrase", phonetic: "/set ɪn ˈməʊʃən/", enDef: "To start a process or series of events.", cn: "启动，引发", exampleEn: "The discovery set in motion a series of important changes.", exampleCn: "这一发现引发了一系列重要的变革。" },
+            { en: "stagnant", type: "word", pos: "adjective", phonetic: "/ˈstæɡnənt/", enDef: "Not moving, growing, or developing.", cn: "停滞的，不发展的", exampleEn: "Wages have remained stagnant while living costs have risen.", exampleCn: "工资停滞不前，而生活成本却在上涨。" },
+            { en: "take precedence over", type: "phrase", pos: "phrase", phonetic: "/teɪk ˈpresɪdəns ˈəʊvə/", enDef: "To be more important than something else.", cn: "优先于，比…更重要", exampleEn: "Safety should always take precedence over speed.", exampleCn: "安全应始终优先于速度。" },
+            { en: "ubiquitous", type: "word", pos: "adjective", phonetic: "/juːˈbɪkwɪtəs/", enDef: "Found everywhere; seeming to be in all places.", cn: "无处不在的", exampleEn: "Smartphones have become ubiquitous in modern life.", exampleCn: "智能手机在现代生活中已变得无处不在。" },
+            { en: "call into question", type: "phrase", pos: "phrase", phonetic: "/kɔːl ˈɪntə ˈkwestʃən/", enDef: "To raise doubts about whether something is true or right.", cn: "对…提出质疑", exampleEn: "The report calls into question the safety of the new drug.", exampleCn: "该报告对新药的安全性提出了质疑。" },
+            { en: "warrant", type: "word", pos: "verb", phonetic: "/ˈwɒrənt/", enDef: "To make something necessary or appropriate.", cn: "使有必要；应当得到", exampleEn: "The situation is serious enough to warrant immediate action.", exampleCn: "情况严重到需要立即采取行动。" },
+
+            // 第四批 91-120: 学术梳理与高阶短语
+            { en: "amplify", type: "word", pos: "verb", phonetic: "/ˈæmplɪfaɪ/", enDef: "To increase the strength or effect of something.", cn: "放大，增强", exampleEn: "Social media can amplify both good and bad messages.", exampleCn: "社交媒体可以放大好的和坏的信息。" },
+            { en: "at the outset", type: "phrase", pos: "phrase", phonetic: "/æt ðə ˈaʊtset/", enDef: "At the very beginning of something.", cn: "在开始时，从一开始", exampleEn: "The goals were clearly defined at the outset of the project.", exampleCn: "项目一开始就明确了目标。" },
+            { en: "breach", type: "word", pos: "noun & verb", phonetic: "/briːtʃ/", enDef: "An act of breaking a law, rule, or agreement.", cn: "违反，破坏", exampleEn: "The company was fined for a breach of safety regulations.", exampleCn: "该公司因违反安全规定而被罚款。" },
+            { en: "call for", type: "phrase", pos: "phrase", phonetic: "/kɔːl fɔː/", enDef: "To demand or require that something happens.", cn: "要求，需要", exampleEn: "The situation calls for immediate government intervention.", exampleCn: "这种情况需要政府立即干预。" },
+            { en: "confer", type: "word", pos: "verb", phonetic: "/kənˈfɜː/", enDef: "To give a right, benefit, or title to someone.", cn: "授予，赋予", exampleEn: "The university confers degrees on thousands of students each year.", exampleCn: "这所大学每年授予成千上万学生学位。" },
+            { en: "dispose of", type: "phrase", pos: "phrase", phonetic: "/dɪˈspəʊz əv/", enDef: "To get rid of something, especially waste.", cn: "处理，丢弃", exampleEn: "We must find safer ways to dispose of chemical waste.", exampleCn: "我们必须找到更安全的方法来处理化学废料。" },
+            { en: "distort", type: "word", pos: "verb", phonetic: "/dɪˈstɔːt/", enDef: "To change something so that it is no longer accurate.", cn: "歪曲，扭曲", exampleEn: "The media can sometimes distort the truth.", exampleCn: "媒体有时会歪曲真相。" },
+            { en: "dwell on", type: "phrase", pos: "phrase", phonetic: "/dwel ɒn/", enDef: "To think or talk about something for too long.", cn: "老是想着，细说", exampleEn: "Try not to dwell on past mistakes and move forward.", exampleCn: "不要老是纠结于过去的错误，向前看。" },
+            { en: "eradicate", type: "word", pos: "verb", phonetic: "/ɪˈrædɪkeɪt/", enDef: "To completely remove or destroy something bad.", cn: "根除，消灭", exampleEn: "Efforts to eradicate polio have been largely successful.", exampleCn: "根除小儿麻痹症的努力在很大程度上是成功的。" },
+            { en: "fall back on", type: "phrase", pos: "phrase", phonetic: "/fɔːl bæk ɒn/", enDef: "To use something as a last option when others fail.", cn: "依靠，求助于（最后选择）", exampleEn: "If the plan fails, we can always fall back on the old system.", exampleCn: "如果计划失败，我们总还可以依靠旧系统。" },
+            { en: "imminent", type: "word", pos: "adjective", phonetic: "/ˈɪmɪnənt/", enDef: "About to happen very soon.", cn: "即将发生的，迫在眉睫的", exampleEn: "Scientists warn that a climate disaster is imminent.", exampleCn: "科学家警告气候灾难迫在眉睫。" },
+            { en: "in the midst of", type: "phrase", pos: "phrase", phonetic: "/ɪn ðə mɪdst əv/", enDef: "In the middle of a situation or period of time.", cn: "在…之中，正值…时", exampleEn: "The country is in the midst of an economic recovery.", exampleCn: "该国正处于经济复苏之中。" },
+            { en: "integral", type: "word", pos: "adjective", phonetic: "/ˈɪntɪɡrəl/", enDef: "Being an essential part of something as a whole.", cn: "不可或缺的，完整的", exampleEn: "Teamwork is an integral part of success in any field.", exampleCn: "团队合作是任何领域成功不可或缺的部分。" },
+            { en: "lose ground", type: "phrase", pos: "phrase", phonetic: "/luːz ɡraʊnd/", enDef: "To fall behind or become less successful.", cn: "失利，落后", exampleEn: "Traditional bookstores are losing ground to online retailers.", exampleCn: "传统书店正在输给线上零售商。" },
+            { en: "momentum", type: "word", pos: "noun", phonetic: "/məˈmentəm/", enDef: "The force that keeps something growing or moving.", cn: "势头，动力", exampleEn: "The reform movement has gained momentum across the nation.", exampleCn: "改革运动在全国范围内势头增强。" },
+            { en: "out of the question", type: "phrase", pos: "phrase", phonetic: "/aʊt əv ðə ˈkwestʃən/", enDef: "Completely impossible or not allowed.", cn: "不可能的，不予考虑的", exampleEn: "Cutting the education budget is out of the question.", exampleCn: "削减教育预算是不可能的。" },
+            { en: "perpetuate", type: "word", pos: "verb", phonetic: "/pəˈpetʃueɪt/", enDef: "To make a bad situation continue to exist.", cn: "使持续，使永久化", exampleEn: "Some traditions perpetuate outdated ideas about gender.", exampleCn: "一些传统使关于性别的过时观念持续存在。" },
+            { en: "run counter to", type: "phrase", pos: "phrase", phonetic: "/rʌn ˈkaʊntə tə/", enDef: "To be the opposite of an idea or rule.", cn: "与…背道而驰，违反", exampleEn: "His actions run counter to everything he claims to believe in.", exampleCn: "他的行为与他声称所信仰的一切背道而驰。" },
+            { en: "sheer", type: "word", pos: "adjective", phonetic: "/ʃɪə/", enDef: "Used to emphasize how big or complete something is.", cn: "纯粹的，十足的", exampleEn: "The sheer volume of data available today is astonishing.", exampleCn: "今天可用数据的庞大数量令人惊讶。" },
+            { en: "spark off", type: "phrase", pos: "phrase", phonetic: "/spɑːk ɒf/", enDef: "To cause something to begin suddenly.", cn: "引发，触发", exampleEn: "The speech sparked off a heated debate about immigration.", exampleCn: "这次演讲引发了一场关于移民的激烈辩论。" },
+            { en: "subsidize", type: "word", pos: "verb", phonetic: "/ˈsʌbsɪdaɪz/", enDef: "To pay part of the cost so that prices can be lower.", cn: "补贴，资助", exampleEn: "The government subsidizes public transport to keep fares low.", exampleCn: "政府补贴公共交通以维持低票价。" },
+            { en: "stand the test of time", type: "phrase", pos: "phrase", phonetic: "/stænd ðə test əv taɪm/", enDef: "To remain valuable or popular for a very long time.", cn: "经得起时间考验", exampleEn: "Shakespeare's works have stood the test of time.", exampleCn: "莎士比亚的作品经受住了时间的考验。" },
+            { en: "tangible", type: "word", pos: "adjective", phonetic: "/ˈtændʒəbl/", enDef: "Real and able to be shown, touched, or measured.", cn: "有形的，可触摸的；切实的", exampleEn: "The new system has produced tangible improvements in efficiency.", exampleCn: "新系统在效率方面带来了切实的改进。" },
+            { en: "tip the balance", type: "phrase", pos: "phrase", phonetic: "/tɪp ðə ˈbæləns/", enDef: "To make a small change that decides an outcome.", cn: "起决定性作用，打破平衡", exampleEn: "The tax incentive could tip the balance for many investors.", exampleCn: "税收优惠可能对许多投资者起决定性作用。" },
+            { en: "undue", type: "word", pos: "adjective", phonetic: "/ʌnˈdjuː/", enDef: "More than is reasonable or necessary.", cn: "过度的，不适当的", exampleEn: "Students should not face undue pressure to succeed.", exampleCn: "学生不应面临过度的成功压力。" },
+            { en: "veer towards", type: "phrase", pos: "phrase", phonetic: "/vɪə təˈwɔːdz/", enDef: "To change direction towards a particular opinion or path.", cn: "转向，倾向于", exampleEn: "Public opinion is veering towards stricter environmental rules.", exampleCn: "公众舆论正倾向于更严格的环境法规。" },
+            { en: "virtue", type: "word", pos: "noun", phonetic: "/ˈvɜːtʃuː/", enDef: "A good quality or moral standard; the advantage of something.", cn: "美德；优点", exampleEn: "Patience is a virtue that every teacher needs.", exampleCn: "耐心是每位老师都需要的美德。" },
+            { en: "wear off", type: "phrase", pos: "phrase", phonetic: "/weə ɒf/", enDef: "To gradually disappear or become less strong.", cn: "逐渐消失，消退", exampleEn: "The effects of the medicine will wear off in a few hours.", exampleCn: "药效将在几小时内逐渐消退。" },
+            { en: "withstand", type: "word", pos: "verb", phonetic: "/wɪðˈstænd/", enDef: "To be strong enough not to be harmed by something.", cn: "承受，经受住", exampleEn: "The bridge is designed to withstand severe earthquakes.", exampleCn: "这座桥的设计能够承受严重的地震。" },
+            { en: "zero in on", type: "phrase", pos: "phrase", phonetic: "/ˈzɪərəʊ ɪn ɒn/", enDef: "To focus all attention on one particular thing.", cn: "集中注意力于，瞄准", exampleEn: "The investigation is zeroing in on three main suspects.", exampleCn: "调查正集中于三名主要嫌疑人。" }
+        ];
+
+        // ========== 听力练习题库 ==========
+        const listeningPassages = [
+            { id: "L01", title: "Hotel Reservation Inquiry", source: "real", sourceLabel: "📋 雅思真题 · Section 1", instruction: "Listen to a conversation between a customer and a hotel receptionist. Answer the questions below.", sentences: ["Good afternoon, Grand Plaza Hotel. How can I help you?", "Yes, hello. I'd like to book a room for two nights, from the 15th of June.", "Certainly. Would you like a single room or a double room?", "A double room, please. With a view of the sea if possible.", "Let me check. Yes, we have a double room with a sea view available at £120 per night.", "That sounds good. Does the price include breakfast?", "Yes, a full English breakfast is included in that price.", "Great. I'd also like to know if you have a fitness centre.", "We do. The gym is open 24 hours and is free for all guests.", "Perfect. Can I also request a late checkout? My flight is not until 6 p.m.", "We can offer a late checkout until 2 p.m. at no extra charge. After that, it's £30.", "That's very helpful. I'll take the room, please.", "Excellent. I'll need your name and credit card details to confirm the booking.", "Of course. My name is Sarah Mitchell. That's M-I-T-C-H-E-L-L."], questions: ["1. How many nights does the customer want to stay?", "2. What type of room does she book?", "3. How much does the room cost per night?", "4. What time can she check out for free?"] },
+            { id: "L02", title: "Museum Tour Guide Talk", source: "real", sourceLabel: "📋 雅思真题 · Section 2", instruction: "Listen to a tour guide introducing the Natural History Museum. Answer the questions.", sentences: ["Good morning everyone, and welcome to the Natural History Museum.", "Before we begin the tour, let me give you some background information.", "This museum first opened its doors to the public in 1881.", "It houses over 80 million specimens, making it one of the largest collections in the world.", "The building itself is a masterpiece of Victorian architecture.", "Please note that photography is allowed in most areas, but no flash, please.", "On the ground floor, you will find the famous Dinosaur Gallery.", "The centrepiece is a 25-metre-long blue whale skeleton hanging from the ceiling.", "The exhibition on human evolution is located on the first floor.", "It traces our origins back over seven million years.", "For those interested in geology, the Earth Sciences gallery is in the basement.", "There you can experience a simulated earthquake.", "The museum shop and café are both situated near the main entrance.", "I recommend visiting the shop at the end of your visit.", "The tour will last approximately one hour.", "After that, you are free to explore the museum at your own pace."], questions: ["1. When did the Natural History Museum first open?", "2. How many specimens does the museum hold?", "3. Where is the Dinosaur Gallery located?", "4. How long does the guided tour last?"] },
+            { id: "L03", title: "Student Research Project Discussion", source: "mock", sourceLabel: "📝 模拟题 · Section 3", instruction: "Listen to two university students discussing their research project on renewable energy.", sentences: ["So, Emma, have you started working on the research project yet?", "Yes, Mark. I've been reading a lot about wind energy this week.", "That's interesting. I've been focusing on solar power instead.", "What have you found so far?", "Well, the cost of solar panels has dropped by almost 90% in the last decade.", "That's a significant decrease. Is that why more people are installing them?", "Exactly. Government subsidies have also played a crucial role in this trend.", "For our project, we need to compare the advantages of different renewable sources.", "I think we should also discuss the barriers to wider adoption.", "Good point. The main barrier seems to be energy storage.", "Renewable sources like wind and solar don't produce energy consistently.", "We need better batteries to store the energy for when the sun isn't shining.", "I agree. Let's include a section on battery technology in our report.", "We should also mention that some countries lag behind in adopting these technologies.", "True. Developing countries often lack the infrastructure to implement such systems.", "Let's meet again on Friday to compare our findings.", "Sounds good. I'll bring my draft outline for the report."], questions: ["1. What topic has Emma been researching?", "2. By how much has the cost of solar panels dropped?", "3. What is the main barrier to wider renewable energy adoption?", "4. When will the two students meet again?"] },
+            { id: "L04", title: "The Impact of Urbanisation on Wildlife", source: "mock", sourceLabel: "📝 模拟题 · Section 4", instruction: "Listen to a university lecture about the effects of urbanisation on wildlife.", sentences: ["Today's lecture focuses on the impact of urbanisation on wildlife populations.", "As cities expand, natural habitats are being destroyed at an unprecedented rate.", "It is estimated that urban areas will triple in size by the year 2050.", "This rapid expansion poses a serious threat to biodiversity worldwide.", "Many species are being forced to adapt to city environments or face extinction.", "Some animals, however, are proving surprisingly resilient.", "Foxes, for instance, have become common in many British cities.", "They have learned to exploit food waste and shelter in urban gardens.", "Birds such as pigeons and sparrows also thrive in city centres.", "On the other hand, species that require large territories are struggling.", "Large mammals like bears and wolves cannot easily coexist with humans.", "The fragmentation of habitats is a particularly serious problem.", "When roads and buildings divide a forest, animal populations become isolated.", "This isolation can lead to inbreeding and a decline in genetic diversity.", "Conservationists are now calling for wildlife corridors to be established.", "These corridors allow animals to move safely between different green spaces.", "Some cities have already begun to implement such measures.", "Singapore, for example, has built special bridges for wildlife.", "Ultimately, we need to strike a balance between development and conservation."], questions: ["1. By what year are urban areas predicted to triple in size?", "2. Name one animal that has adapted well to city life.", "3. What problem does habitat fragmentation cause for animal populations?", "4. What solution are conservationists proposing?"] }
+        ];
+
+        // ========== 状态管理 ==========
+        const SESSION_SIZE = 30;
+        let currentVocabulary = []; // 当前会话的词汇
+        let currentIndex = 0;
+        let cnRevealed = false;
+        let exRevealed = false;
+        let cameFromArticle = false;
+        let tooltipWord = null;
+        let currentHistoryId = null; // 当前会话关联的历史ID
+
+        // ========== localStorage ==========
+        function getHistory() {
+            try { return JSON.parse(localStorage.getItem('ielts_history') || '[]'); }
+            catch (e) { return []; }
+        }
+        function saveHistory(history) {
+            localStorage.setItem('ielts_history', JSON.stringify(history));
+        }
+
+        // 获取所有已被历史使用的词汇索引
+        function getUsedWordIndices() {
+            const history = getHistory();
+            const used = new Set();
+            history.forEach(h => {
+                if (h.wordIndices) h.wordIndices.forEach(i => used.add(i));
+            });
+            return used;
+        }
+
+        // 从主词库中选取 N 个未曾使用的词汇
+        function pickNewWords(count) {
+            const used = getUsedWordIndices();
+            const available = [];
+            masterVocabulary.forEach((_, i) => {
+                if (!used.has(i)) available.push(i);
+            });
+
+            // 如果可用词汇不足，则重置历史（所有词都可以用）
+            if (available.length < count) {
+                if (confirm('所有词汇都已学过！是否清除历史记录以重新开始？')) {
+                    localStorage.removeItem('ielts_history');
+                    return pickNewWords(count);
+                }
+                // 用户拒绝清除，就用所有可用的
+            }
+
+            // 随机打乱可用索引
+            const shuffled = [...available].sort(() => Math.random() - 0.5);
+            return shuffled.slice(0, Math.min(count, available.length));
+        }
+
+        // 根据词汇索引数组构建当前词汇表
+        function buildVocabulary(indices) {
+            return indices.map(i => masterVocabulary[i]);
+        }
+
+        // ========== 渲染历史记录 ==========
+        let currentHistoryTab = 'vocab';
+
+        function switchHistoryTab(tab) {
+            currentHistoryTab = tab;
+            document.getElementById('tabVocab').classList.toggle('active', tab === 'vocab');
+            document.getElementById('tabListen').classList.toggle('active', tab === 'listen');
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const isVocab = currentHistoryTab === 'vocab';
+            const history = isVocab ? getHistory() : getListenHistory();
+            const list = document.getElementById('historyList');
+            const countEl = document.getElementById('historyCount');
+            countEl.textContent = getHistory().length + getListenHistory().length;
+
+            if (history.length === 0) {
+                const label = isVocab ? '词汇学习' : '听力练习';
+                list.innerHTML = `
+                    <div class="history-empty">
+                        <div class="empty-icon">📭</div>
+                        <div>还没有${label}记录<br>点击上方按钮开始你的第一次学习吧！</div>
+                    </div>`;
+                return;
+            }
+
+            const sorted = [...history].reverse();
+
+            if (isVocab) {
+                // 词汇历史渲染
+                list.innerHTML = sorted.map((h, i) => {
+                    const date = new Date(h.timestamp);
+                    const dateStr = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+                    const timeStr = `${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+                    const previewWords = (h.wordIndices || []).slice(0, 5).map(idx => masterVocabulary[idx]?.en || '');
+                    const iconEmojis = ['📚', '📖', '📝', '🌟', '💡'];
+                    const icon = iconEmojis[sorted.length - 1 - i % iconEmojis.length];
+                    return `
+                        <div class="history-card" onclick="relearnHistory('${h.id}')">
+                            <div class="h-icon">${icon}</div>
+                            <div class="h-info">
+                                <div class="h-date">${dateStr} ${timeStr}</div>
+                                <div class="h-meta">
+                                    <span>📊 ${h.wordIndices?.length || 0} 个词汇短语</span>
+                                    <span>${h.completed ? '✅ 已完成' : '⏳ 未完成'}</span>
+                                </div>
+                                <div class="h-tags">
+                                    ${previewWords.map(w => `<span class="h-tag">${escapeHtml(w)}</span>`).join('')}
+                                    ${(h.wordIndices?.length || 0) > 5 ? `<span class="h-tag">+${h.wordIndices.length - 5} more</span>` : ''}
+                                </div>
+                            </div>
+                            <span class="h-arrow">→</span>
+                            <button class="h-delete" onclick="event.stopPropagation();deleteHistory('${h.id}')" title="删除记录">🗑</button>
+                        </div>`;
+                }).join('');
+            } else {
+                // 听力历史渲染
+                list.innerHTML = sorted.map((h, i) => {
+                    const date = new Date(h.timestamp);
+                    const dateStr = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+                    const timeStr = `${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+                    const iconEmojis = ['🎧', '🎵', '🎼', '🎤', '🔊'];
+                    const icon = iconEmojis[i % iconEmojis.length];
+                    const sourceTag = h.source === 'real' ? '真题' : '模拟题';
+                    return `
+                        <div class="history-card" onclick="relearnListenHistory('${h.id}')">
+                            <div class="h-icon">${icon}</div>
+                            <div class="h-info">
+                                <div class="h-date">${dateStr} ${timeStr}</div>
+                                <div class="h-meta">
+                                    <span>🎧 ${escapeHtml(h.passageTitle || '')}</span>
+                                    <span class="listen-source-tag ${h.source || 'mock'}" style="font-size:0.65rem;padding:0.15rem 0.5rem;">${sourceTag}</span>
+                                </div>
+                                <div class="h-tags">
+                                    <span class="h-tag">Section #${h.passageId?.replace('L','') || '?'}</span>
+                                </div>
+                            </div>
+                            <span class="h-arrow">→</span>
+                            <button class="h-delete" onclick="event.stopPropagation();deleteListenHistory('${h.id}')" title="删除记录">🗑</button>
+                        </div>`;
+                }).join('');
+            }
+        }
+
+        function relearnListenHistory(historyId) {
+            stopSpeaking();
+            const history = getListenHistory();
+            const record = history.find(h => h.id === historyId);
+            if (!record) { alert('历史记录无效'); return; }
+            const passage = listeningPassages.find(p => p.id === record.passageId);
+            if (!passage) { alert('听力原文已不可用'); return; }
+            currentPassage = passage;
+            document.getElementById('listenSourceTag').textContent = passage.sourceLabel;
+            document.getElementById('listenSourceTag').className = 'listen-source-tag ' + passage.source;
+            document.getElementById('listenPassageId').textContent = '#' + passage.id;
+            document.getElementById('listenTitle').textContent = passage.title;
+            document.getElementById('listenInstruction').textContent = passage.instruction;
+            document.getElementById('listenQuestions').innerHTML = '<h4>📝 Questions</h4>' +
+                passage.questions.map(q => `<div class="q-item"><span class="q-num">?</span>${wrapPlainWords(q)}</div>`).join('');
+            stopSpeaking();
+            listenSentenceIndex = 0;
+            listenIsPlaying = false;
+            transcriptVisible = false;
+            document.getElementById('btnListenLabel').textContent = '播放听力';
+            document.getElementById('btnListenPlay').classList.remove('playing');
+            document.getElementById('btnToggleTranscript').textContent = '📄 显示原文';
+            document.getElementById('listenTranscript').classList.remove('visible');
+            document.getElementById('listenTranscript').innerHTML = '';
+            hideAllPages();
+            document.getElementById('listenPage').style.display = 'flex';
+            document.getElementById('listenPage').classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function deleteListenHistory(historyId) {
+            if (!confirm('确定要删除这条听力记录吗？')) return;
+            const history = getListenHistory();
+            const updated = history.filter(h => h.id !== historyId);
+            saveListenHistory(updated);
+            renderHistory();
+        }
+
+        // ========== 开始新会话 ==========
+        function startNewSession() {
+            stopSpeaking();
+            showSelectionModal();
+        }
+
+        function showSelectionModal() {
+            const existing = document.getElementById('selectionModal');
+            if (existing) existing.remove();
+
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay';
+            overlay.id = 'selectionModal';
+            overlay.innerHTML = `
+                <div class="modal-card">
+                    <h3>📚 选择学习模式</h3>
+                    <p class="modal-desc">请选择你想要进行的学习内容</p>
+                    <div class="modal-options">
+                        <div class="modal-option" id="optVocab">
+                            <div class="opt-icon">📖</div>
+                            <div class="opt-info">
+                                <div class="opt-title">词汇学习</div>
+                                <div class="opt-sub">学习30个雅思高频词汇与短语</div>
+                            </div>
+                        </div>
+                        <div class="modal-option" id="optListen">
+                            <div class="opt-icon">🎧</div>
+                            <div class="opt-info">
+                                <div class="opt-title">听力练习</div>
+                                <div class="opt-sub">雅思听力真题 / 模拟题训练</div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="modal-close" id="modalClose">取消</button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+
+            overlay.querySelector('#optVocab').onclick = () => { overlay.remove(); startVocabSession(); };
+            overlay.querySelector('#optListen').onclick = () => { overlay.remove(); startListenSession(); };
+            overlay.querySelector('#modalClose').onclick = () => overlay.remove();
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+        }
+
+        function startVocabSession() {
+            const indices = pickNewWords(SESSION_SIZE);
+            if (indices.length === 0) {
+                alert('暂无可用的新词汇，请先清除历史记录。');
+                return;
+            }
+            currentVocabulary = buildVocabulary(indices);
+            const history = getHistory();
+            const record = { id: Date.now().toString(), timestamp: Date.now(), wordIndices: indices, completed: false };
+            history.push(record);
+            saveHistory(history);
+            currentHistoryId = record.id;
+
+            // 进入学习页
+            currentIndex = 0;
+            cnRevealed = false;
+            exRevealed = false;
+            cameFromArticle = false;
+            hideAllPages();
+            document.getElementById('learnPage').style.display = 'flex';
+            document.getElementById('learnPage').classList.add('active');
+            document.getElementById('btnBackArticle').classList.remove('visible');
+            renderWord(currentIndex);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ========== 听力练习 ==========
+        let currentPassage = null;
+        let listenSentenceIndex = 0;
+        let listenIsPlaying = false;
+        let listenUtterances = [];
+        let transcriptVisible = false;
+
+        function startListenSession() {
+            // 保证最近3次中至少有1次真题
+            const recentHistory = getListenHistory().slice(-2);
+            const recentAllMock = recentHistory.length >= 2 && recentHistory.every(h => h.source === 'mock');
+            let pool = listeningPassages;
+            if (recentAllMock) {
+                pool = listeningPassages.filter(p => p.source === 'real');
+            }
+            const idx = Math.floor(Math.random() * pool.length);
+            currentPassage = pool[idx];
+
+            document.getElementById('listenSourceTag').textContent = currentPassage.sourceLabel;
+            document.getElementById('listenSourceTag').className = 'listen-source-tag ' + currentPassage.source;
+            document.getElementById('listenPassageId').textContent = '#' + currentPassage.id;
+            document.getElementById('listenTitle').textContent = currentPassage.title;
+            document.getElementById('listenInstruction').textContent = currentPassage.instruction;
+            document.getElementById('listenQuestions').innerHTML = '<h4>📝 Questions</h4>' +
+                currentPassage.questions.map(q => `<div class="q-item"><span class="q-num">?</span>${wrapPlainWords(q)}</div>`).join('');
+
+            // 重置状态
+            stopSpeaking();
+            listenSentenceIndex = 0;
+            listenIsPlaying = false;
+            transcriptVisible = false;
+            document.getElementById('btnListenLabel').textContent = '播放听力';
+            document.getElementById('btnListenPlay').classList.remove('playing');
+            document.getElementById('btnToggleTranscript').textContent = '📄 显示原文';
+            document.getElementById('listenTranscript').classList.remove('visible');
+            document.getElementById('listenTranscript').innerHTML = '';
+
+            // 保存历史
+            const history = getListenHistory();
+            const record = { id: Date.now().toString(), timestamp: Date.now(), passageId: currentPassage.id, passageTitle: currentPassage.title, source: currentPassage.source };
+            history.push(record);
+            saveListenHistory(history);
+
+            hideAllPages();
+            document.getElementById('listenPage').style.display = 'flex';
+            document.getElementById('listenPage').classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleListenPlay() {
+            if (listenIsPlaying) {
+                stopListenPlay();
+            } else {
+                startListenPlay();
+            }
+        }
+
+        function startListenPlay() {
+            if (!currentPassage) return;
+            stopSpeaking();
+            listenIsPlaying = true;
+            listenSentenceIndex = 0;
+            listenUtterances = [];
+
+            const btn = document.getElementById('btnListenPlay');
+            btn.classList.add('playing');
+            document.getElementById('btnListenLabel').textContent = '停止播放';
+
+            buildTranscriptDOM();
+
+            const sentences = currentPassage.sentences;
+            const fullText = sentences.join(' ');
+            const utterance = new SpeechSynthesisUtterance(fullText);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.88;
+            const voices = speechSynthesis.getVoices();
+            const enVoice = voices.find(v => v.lang === 'en-US' && v.name.includes('Google'))
+                || voices.find(v => v.lang === 'en-US')
+                || voices.find(v => v.lang.startsWith('en'));
+            if (enVoice) utterance.voice = enVoice;
+
+            // 使用定时器估算句子高亮（每句按词数分配时间比例）
+            const wordCounts = sentences.map(s => s.split(' ').length);
+            const totalWords = wordCounts.reduce((a, b) => a + b, 0);
+            // 估算总时长：平均每秒2.5个词（rate 0.88 稍慢）
+            const wordsPerSec = 2.2;
+            const totalDuration = (totalWords / wordsPerSec) * 1000;
+            let elapsed = 0;
+            const timers = [];
+
+            for (let i = 0; i < sentences.length; i++) {
+                const delay = elapsed;
+                const timerId = setTimeout(() => {
+                    if (!listenIsPlaying) return;
+                    listenSentenceIndex = i;
+                    highlightTranscriptSentence(i);
+                }, delay);
+                timers.push(timerId);
+                elapsed += (wordCounts[i] / totalWords) * totalDuration;
+            }
+
+            utterance.onend = () => {
+                stopListenPlay();
+                timers.forEach(t => clearTimeout(t));
+            };
+            utterance.onerror = () => {
+                stopListenPlay();
+                timers.forEach(t => clearTimeout(t));
+            };
+
+            currentUtterance = utterance;
+            speechSynthesis.speak(utterance);
+        }
+
+        function stopListenPlay() {
+            if (!listenIsPlaying) return;
+            listenIsPlaying = false;
+            speechSynthesis.cancel();
+            currentUtterance = null;
+            const btn = document.getElementById('btnListenPlay');
+            if (btn) {
+                btn.classList.remove('playing');
+                document.getElementById('btnListenLabel').textContent = '播放听力';
+            }
+            document.querySelectorAll('.t-sentence.active').forEach(el => el.classList.remove('active'));
+        }
+
+        function buildTranscriptDOM() {
+            if (!currentPassage) return;
+            const container = document.getElementById('listenTranscript');
+            const html = currentPassage.sentences.map((s, i) =>
+                `<span class="t-sentence" data-sidx="${i}">${wrapPlainWords(s)}</span> `
+            ).join('');
+            container.innerHTML = html;
+        }
+
+        function highlightTranscriptSentence(idx) {
+            if (!transcriptVisible) return;
+            document.querySelectorAll('.t-sentence.active').forEach(el => el.classList.remove('active'));
+            const el = document.querySelector(`.t-sentence[data-sidx="${idx}"]`);
+            if (el) {
+                el.classList.add('active');
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function toggleTranscript() {
+            const container = document.getElementById('listenTranscript');
+            const btn = document.getElementById('btnToggleTranscript');
+            transcriptVisible = !transcriptVisible;
+
+            if (transcriptVisible) {
+                if (!container.innerHTML.trim()) buildTranscriptDOM();
+                container.classList.add('visible');
+                btn.textContent = '🙈 隐藏原文';
+                if (listenIsPlaying) highlightTranscriptSentence(listenSentenceIndex);
+            } else {
+                container.classList.remove('visible');
+                btn.textContent = '📄 显示原文';
+            }
+        }
+
+        // ========== 听力历史 ==========
+        function getListenHistory() {
+            try { return JSON.parse(localStorage.getItem('ielts_listen_history') || '[]'); }
+            catch (e) { return []; }
+        }
+        function saveListenHistory(history) {
+            localStorage.setItem('ielts_listen_history', JSON.stringify(history));
+        }
+
+        // ========== 从历史记录重新学习 ==========
+        function relearnHistory(historyId) {
+            stopSpeaking();
+            const history = getHistory();
+            const record = history.find(h => h.id === historyId);
+            if (!record || !record.wordIndices) {
+                alert('历史记录无效');
+                return;
+            }
+            currentVocabulary = buildVocabulary(record.wordIndices);
+            currentHistoryId = historyId;
+
+            currentIndex = 0;
+            cnRevealed = false;
+            exRevealed = false;
+            cameFromArticle = false;
+            hideAllPages();
+            document.getElementById('learnPage').style.display = 'flex';
+            document.getElementById('learnPage').classList.add('active');
+            document.getElementById('btnBackArticle').classList.remove('visible');
+            renderWord(currentIndex);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ========== 删除历史记录 ==========
+        function deleteHistory(historyId) {
+            if (!confirm('确定要删除这条学习记录吗？此操作不可撤销。')) return;
+            const history = getHistory();
+            const updated = history.filter(h => h.id !== historyId);
+            saveHistory(updated);
+            renderHistory();
+        }
+
+        // ========== 标记历史记录完成 ==========
+        function markHistoryCompleted() {
+            if (currentHistoryId) {
+                const history = getHistory();
+                const record = history.find(h => h.id === currentHistoryId);
+                if (record) {
+                    record.completed = true;
+                    saveHistory(history);
+                }
+            }
+        }
+
+        // 词典已移至 dictionary.js（通过 <script src> 加载）
+
+        const vocabKeys = () => currentVocabulary.map(v => v.en.toLowerCase()).sort((a, b) => b.length - a.length);
+
+        // ========== 涂鸦生成 ==========
+        function generateDoodleSVG() {
+            const doodles = [
+                `<g transform="translate(20,18) scale(0.5)"><circle cx="25" cy="30" r="20" fill="#FFD93D" stroke="#444" stroke-width="2.5"/><circle cx="18" cy="25" r="3" fill="#444"/><circle cx="32" cy="25" r="3" fill="#444"/><path d="M22 35 Q25 40 28 35" fill="none" stroke="#444" stroke-width="2" stroke-linecap="round"/><path d="M10 15 L18 25" stroke="#444" stroke-width="2.5"/><path d="M40 15 L32 25" stroke="#444" stroke-width="2.5"/><circle cx="12" cy="13" r="5" fill="#FF6B6B"/><circle cx="38" cy="13" r="5" fill="#FF6B6B"/></g>`,
+                `<g transform="translate(80,12) scale(0.45)"><polygon points="25,0 31,18 50,18 34,30 40,48 25,38 10,48 16,30 0,18 19,18" fill="#FFD93D" stroke="#444" stroke-width="2.5"/></g>`,
+                `<g transform="translate(140,18) scale(0.45)"><circle cx="25" cy="28" r="18" fill="#DFE6E9" stroke="#aaa" stroke-width="2"/><circle cx="42" cy="20" r="14" fill="#DFE6E9" stroke="#aaa" stroke-width="2"/><circle cx="55" cy="30" r="12" fill="#DFE6E9" stroke="#aaa" stroke-width="2"/></g>`,
+                `<g transform="translate(200,15) scale(0.45)"><ellipse cx="25" cy="28" rx="22" ry="18" fill="#FDCB6E" stroke="#444" stroke-width="2.5"/><circle cx="16" cy="20" r="7" fill="#FDCB6E" stroke="#444" stroke-width="2.5"/><circle cx="14" cy="18" r="2.5" fill="#444"/><circle cx="19" cy="18" r="2" fill="#444"/><ellipse cx="16" cy="24" rx="4" ry="3" fill="#444"/></g>`,
+                `<g transform="translate(270,14) scale(0.42)"><circle cx="28" cy="30" r="22" fill="#E17055" stroke="#444" stroke-width="2.5"/><circle cx="22" cy="24" r="4" fill="#444"/><circle cx="34" cy="24" r="4" fill="#444"/><ellipse cx="28" cy="34" rx="5" ry="3" fill="#444"/><circle cx="12" cy="14" r="8" fill="#E17055" stroke="#444" stroke-width="2.5"/><circle cx="44" cy="14" r="8" fill="#E17055" stroke="#444" stroke-width="2.5"/></g>`,
+                `<g transform="translate(330,16) scale(0.45)"><circle cx="25" cy="25" r="10" fill="#FFEAA7"/><circle cx="15" cy="15" r="9" fill="#FDCB6E"/><circle cx="35" cy="35" r="9" fill="#FDCB6E"/><circle cx="25" cy="25" r="6" fill="#E17055"/></g>`,
+                `<g transform="translate(15,45) scale(0.42)"><ellipse cx="25" cy="30" rx="18" ry="20" fill="#fff" stroke="#444" stroke-width="2.5"/><circle cx="18" cy="22" r="3" fill="#444"/><circle cx="32" cy="22" r="3" fill="#444"/><ellipse cx="25" cy="32" rx="4" ry="3" fill="#FF6B6B"/></g>`,
+                `<g transform="translate(80,48) scale(0.4)"><path d="M5 40 Q30 -10 55 40" fill="none" stroke="#FF6B6B" stroke-width="4"/><path d="M10 40 Q30 -3 50 40" fill="none" stroke="#FDCB6E" stroke-width="4"/><path d="M15 40 Q30 5 45 40" fill="none" stroke="#00B894" stroke-width="4"/></g>`,
+                `<g transform="translate(150,46) scale(0.4)"><path d="M15 30 L15 45 Q15 50 20 50 L30 50 Q35 50 35 45 L35 30 Z" fill="#FDCB6E" stroke="#444" stroke-width="2.5"/><circle cx="25" cy="22" r="16" fill="#FF6B6B" stroke="#444" stroke-width="2.5"/></g>`,
+                `<g transform="translate(210,44) scale(0.4)"><ellipse cx="25" cy="32" rx="16" ry="20" fill="#2d3436"/><ellipse cx="25" cy="30" rx="12" ry="15" fill="#fff"/><circle cx="20" cy="20" r="3" fill="#444"/><circle cx="30" cy="20" r="3" fill="#444"/><ellipse cx="25" cy="28" rx="5" ry="3" fill="#FDCB6E"/></g>`,
+                `<g transform="translate(280,48) scale(0.42)"><circle cx="25" cy="25" r="14" fill="#FDCB6E"/></g>`,
+                `<g transform="translate(330,44) scale(0.43)"><circle cx="20" cy="22" r="12" fill="#dfe6e9"/><circle cx="35" cy="18" r="9" fill="#dfe6e9"/><circle cx="48" cy="24" r="8" fill="#dfe6e9"/></g>`
+            ];
+            const count = 7 + Math.floor(Math.random() * 4);
+            const shuffled = [...doodles].sort(() => Math.random() - 0.5);
+            return `<svg viewBox="0 0 380 80" xmlns="http://www.w3.org/2000/svg">${shuffled.slice(0, count).join('')}</svg>`;
+        }
+
+        function generateSmallDoodleSVG() {
+            const doodles = [
+                `<g transform="translate(30,10) scale(0.38)"><circle cx="25" cy="30" r="20" fill="#FFD93D" stroke="#555" stroke-width="2.5"/><circle cx="18" cy="25" r="3" fill="#555"/><circle cx="32" cy="25" r="3" fill="#555"/></g>`,
+                `<g transform="translate(100,8) scale(0.35)"><polygon points="25,0 31,18 50,18 34,30 40,48 25,38 10,48 16,30 0,18 19,18" fill="#FFD93D" stroke="#555" stroke-width="2.5"/></g>`,
+                `<g transform="translate(160,10) scale(0.35)"><ellipse cx="25" cy="28" rx="22" ry="18" fill="#FDCB6E" stroke="#555" stroke-width="2.5"/><circle cx="16" cy="20" r="7" fill="#FDCB6E" stroke="#555" stroke-width="2.5"/></g>`,
+                `<g transform="translate(230,8) scale(0.33)"><circle cx="28" cy="30" r="22" fill="#E17055" stroke="#555" stroke-width="2.5"/><circle cx="22" cy="24" r="4" fill="#555"/></g>`,
+                `<g transform="translate(290,10) scale(0.36)"><circle cx="25" cy="25" r="10" fill="#FFEAA7"/><circle cx="15" cy="15" r="9" fill="#FDCB6E"/><circle cx="35" cy="35" r="9" fill="#FDCB6E"/></g>`,
+                `<g transform="translate(10,10) scale(0.33)"><ellipse cx="25" cy="30" rx="18" ry="20" fill="#fff" stroke="#555" stroke-width="2.5"/><circle cx="18" cy="22" r="3" fill="#555"/></g>`,
+                `<g transform="translate(60,8) scale(0.32)"><path d="M0 40 Q30 -15 60 40" fill="none" stroke="#FF6B6B" stroke-width="4"/></g>`,
+                `<g transform="translate(140,8) scale(0.35)"><circle cx="20" cy="22" r="12" fill="#dfe6e9"/><circle cx="35" cy="18" r="9" fill="#dfe6e9"/></g>`
+            ];
+            const count = 4 + Math.floor(Math.random() * 3);
+            const shuffled = [...doodles].sort(() => Math.random() - 0.5);
+            return `<svg viewBox="0 0 360 50" xmlns="http://www.w3.org/2000/svg">${shuffled.slice(0, count).join('')}</svg>`;
+        }
+
+        // ========== 文本高亮与可点击词 ==========
+        function renderTextWithHighlights(text, highlightTerms, clickable = true) {
+            const textLower = text.toLowerCase();
+            const highlights = [];
+            for (const term of highlightTerms) {
+                const termLower = term.toLowerCase();
+                let idx = 0;
+                while ((idx = textLower.indexOf(termLower, idx)) !== -1) {
+                    highlights.push({ start: idx, end: idx + term.length, term: term });
+                    idx += term.length;
+                }
+            }
+            highlights.sort((a, b) => a.start - b.start || b.end - a.end);
+            const merged = [];
+            for (const h of highlights) {
+                if (merged.length === 0 || h.start >= merged[merged.length - 1].end) merged.push(h);
+            }
+            let result = '';
+            let pos = 0;
+            for (const h of merged) {
+                if (pos < h.start) result += wrapPlainWords(text.slice(pos, h.start));
+                const onclick = clickable ? ` onclick="event.stopPropagation();onHighlightClick('${escapeHtml(h.term)}')"` : '';
+                result += `<span class="word-highlight" data-term="${escapeHtml(h.term)}"${onclick}>${escapeHtml(text.slice(h.start, h.end))}</span>`;
+                pos = h.end;
+            }
+            if (pos < text.length) result += wrapPlainWords(text.slice(pos));
+            return result;
+        }
+
+        function wrapPlainWords(text) {
+            return text.replace(/([a-zA-Z]+(?:'[a-zA-Z]+)?)/g, (match) => {
+                return `<span class="word-clickable" data-word="${escapeHtml(match)}" onclick="event.stopPropagation();onWordClick(event, '${escapeHtml(match)}')">${escapeHtml(match)}</span>`;
+            });
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // ========== 词译弹窗 ==========
+        function lookupWord(w) {
+            // 1. 精确匹配
+            if (dictionary[w]) return dictionary[w];
+            // 2. 去掉结尾标点
+            const clean = w.replace(/[^a-z']/g, '');
+            if (dictionary[clean]) return dictionary[clean];
+            // 3. 尝试词干形式
+            const tries = [];
+            if (clean.endsWith('s') && !clean.endsWith('ss')) tries.push(clean.slice(0, -1));
+            if (clean.endsWith('es')) tries.push(clean.slice(0, -2));
+            if (clean.endsWith('ies')) tries.push(clean.slice(0, -3) + 'y');
+            if (clean.endsWith('ves')) tries.push(clean.slice(0, -3) + 'f');
+            if (clean.endsWith('ing')) { tries.push(clean.slice(0, -3)); tries.push(clean.slice(0, -3) + 'e'); }
+            if (clean.endsWith('ed')) { tries.push(clean.slice(0, -2)); tries.push(clean.slice(0, -1)); tries.push(clean.slice(0, -2) + 'e'); }
+            if (clean.endsWith('er')) { tries.push(clean.slice(0, -2)); tries.push(clean.slice(0, -2) + 'e'); }
+            if (clean.endsWith('est')) { tries.push(clean.slice(0, -3)); tries.push(clean.slice(0, -3) + 'e'); }
+            if (clean.endsWith('ly')) tries.push(clean.slice(0, -2));
+            if (clean.endsWith('ness')) tries.push(clean.slice(0, -4));
+            if (clean.endsWith('ment')) tries.push(clean.slice(0, -4));
+            if (clean.endsWith('tion')) tries.push(clean.slice(0, -4));
+            if (clean.endsWith('sion')) tries.push(clean.slice(0, -4));
+            if (clean.endsWith('able')) tries.push(clean.slice(0, -4));
+            if (clean.endsWith('ible')) tries.push(clean.slice(0, -4));
+            if (clean.endsWith('ful')) tries.push(clean.slice(0, -3));
+            if (clean.endsWith('less')) tries.push(clean.slice(0, -4));
+            if (clean.endsWith('ous')) tries.push(clean.slice(0, -3));
+            if (clean.endsWith('ive')) tries.push(clean.slice(0, -3));
+            if (clean.endsWith('al')) tries.push(clean.slice(0, -2));
+            if (clean.endsWith('ally')) tries.push(clean.slice(0, -4));
+            for (const t of tries) { if (dictionary[t]) return dictionary[t]; }
+            return null;
+        }
+
+        // ========== 翻译缓存 ==========
+        function getTranslationCache() {
+            try { return JSON.parse(localStorage.getItem('word_cache') || '{}'); }
+            catch (e) { return {}; }
+        }
+        function saveTranslationCache(cache) {
+            try { localStorage.setItem('word_cache', JSON.stringify(cache)); }
+            catch (e) { /* storage full, ignore */ }
+        }
+
+        async function translateWordENtoZH(word) {
+            const clean = word.toLowerCase().replace(/[^a-z]/g, '');
+            if (!clean || clean.length < 2) return null;
+
+            // 1. 本地词典 + 词形还原
+            const local = lookupWord(clean);
+            if (local) return local;
+
+            // 2. 缓存
+            const cache = getTranslationCache();
+            if (cache[clean]) return cache[clean];
+
+            // 3. MyMemory API
+            try {
+                const resp = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(clean)}&langpair=en|zh`);
+                const data = await resp.json();
+                if (data.responseStatus === 200 && data.responseData.translatedText) {
+                    const translated = data.responseData.translatedText;
+                    // 去重：如果翻译结果和原文一样，标记为未知
+                    if (translated.toLowerCase() === clean.toLowerCase()) return null;
+                    cache[clean] = translated;
+                    saveTranslationCache(cache);
+                    return translated;
+                }
+            } catch (e) { /* API失败 */ }
+            return null;
+        }
+
+        function formatTranslation(translation) {
+            if (!translation) return '—';
+            // 用 | 分隔多个释义
+            const parts = translation.split('|');
+            if (parts.length === 1) return parts[0];
+            return parts.map((p, i) => i === 0 ? `<strong>${p}</strong>` : p).join(' · ');
+        }
+
+        function onWordClick(event, word) {
+            event.stopPropagation();
+            const wordLower = word.toLowerCase().replace(/[^a-z']/g, '');
+            const tooltip = document.getElementById('wordTooltip');
+            const tooltipOrig = document.getElementById('tooltipOriginal');
+            const tooltipTrans = document.getElementById('tooltipTranslation');
+
+            if (tooltipWord === wordLower && tooltip.classList.contains('visible')) {
+                hideTooltip();
+                return;
+            }
+            tooltipWord = wordLower;
+            tooltipOrig.textContent = word;
+            tooltipTrans.innerHTML = '查询中…';
+
+            const target = event.target;
+            const rect = target.getBoundingClientRect();
+            // 动态计算宽度
+            tooltip.style.whiteSpace = 'normal';
+            tooltip.style.maxWidth = '280px';
+            const tooltipWidth = Math.min(tooltip.offsetWidth || 180, 280);
+            const left = Math.min(Math.max(rect.left + rect.width / 2 - tooltipWidth / 2, 10), window.innerWidth - tooltipWidth - 10);
+            const top = rect.top - 60;
+            tooltip.style.left = left + 'px';
+            tooltip.style.top = top + 'px';
+            tooltip.classList.add('visible');
+
+            translateWordENtoZH(wordLower).then(translation => {
+                if (tooltipWord === wordLower) {
+                    tooltipTrans.innerHTML = formatTranslation(translation);
+                }
+            });
+        }
+
+        function hideTooltip() {
+            document.getElementById('wordTooltip').classList.remove('visible');
+            tooltipWord = null;
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.word-clickable')) hideTooltip();
+        });
+
+        function onHighlightClick(term) {
+            stopSpeaking();
+            const idx = currentVocabulary.findIndex(v => v.en.toLowerCase() === term.toLowerCase());
+            if (idx >= 0) {
+                cameFromArticle = true;
+                hideAllPages();
+                document.getElementById('learnPage').style.display = 'flex';
+                document.getElementById('learnPage').classList.add('active');
+                document.getElementById('btnBackArticle').classList.add('visible');
+                currentIndex = idx;
+                cnRevealed = false;
+                exRevealed = false;
+                renderWord(currentIndex);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function onBankTagClick(term) { onHighlightClick(term); }
+
+        function backToArticle() {
+            stopSpeaking();
+            cameFromArticle = false;
+            hideAllPages();
+            document.getElementById('challengePage').style.display = 'flex';
+            document.getElementById('challengePage').classList.add('active');
+            document.getElementById('btnBackArticle').classList.remove('visible');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ========== 渲染单词/短语 ==========
+        function renderWord(index) {
+            const item = currentVocabulary[index];
+            document.getElementById('currentNum').textContent = index + 1;
+            const counterLabel = document.getElementById('wordCounterLabel');
+            counterLabel.innerHTML = item.type === 'phrase'
+                ? '短语 <strong id="currentNum">' + (index + 1) + '</strong> / ' + currentVocabulary.length
+                : '词汇 <strong id="currentNum">' + (index + 1) + '</strong> / ' + currentVocabulary.length;
+
+            const typeTag = document.getElementById('typeTag');
+            if (item.type === 'phrase') {
+                typeTag.textContent = '📎 PHRASE'; typeTag.className = 'type-tag phrase';
+            } else {
+                typeTag.textContent = item.pos.toUpperCase(); typeTag.className = 'type-tag word';
+            }
+
+            const wordEl = document.getElementById('wordEnglish');
+            // 短语中每个单词可点击翻译
+            wordEl.innerHTML = wrapPlainWords(item.en);
+            wordEl.className = item.type === 'phrase' ? 'word-english phrase-text' : 'word-english';
+            document.getElementById('wordPhonetic').textContent = item.phonetic;
+            document.getElementById('enDefinition').innerHTML = wrapPlainWords(item.enDef);
+            document.getElementById('exampleEn').innerHTML = renderTextWithHighlights(item.exampleEn, vocabKeys(), false);
+
+            const cnDef = document.getElementById('cnDefinition');
+            cnDef.textContent = item.cn;
+            const doodleCover = document.getElementById('doodleCover');
+            const revealBtn = document.getElementById('revealBtn');
+            cnRevealed = false;
+            cnDef.classList.add('blurred');
+            doodleCover.style.display = 'flex';
+            doodleCover.classList.remove('fading');
+            doodleCover.innerHTML = generateDoodleSVG();
+            revealBtn.textContent = '👀 显示';
+            revealBtn.classList.remove('showing');
+
+            const exampleCn = document.getElementById('exampleCn');
+            exampleCn.textContent = item.exampleCn;
+            const doodleCoverEx = document.getElementById('doodleCoverExample');
+            const revealBtnEx = document.getElementById('revealBtnExample');
+            exRevealed = false;
+            exampleCn.classList.add('blurred');
+            doodleCoverEx.style.display = 'flex';
+            doodleCoverEx.classList.remove('fading');
+            doodleCoverEx.innerHTML = generateSmallDoodleSVG();
+            revealBtnEx.textContent = '👀 显示翻译';
+            revealBtnEx.classList.remove('showing');
+
+            const pct = ((index + 1) / currentVocabulary.length) * 100;
+            document.getElementById('miniProgressFill').style.width = pct + '%';
+            buildNumberGrid(index);
+
+            const btnPrev = document.getElementById('btnPrev');
+            if (index === 0) btnPrev.classList.add('hidden-nav');
+            else btnPrev.classList.remove('hidden-nav');
+
+            const btnBack = document.getElementById('btnBackArticle');
+            if (cameFromArticle) btnBack.classList.add('visible');
+            else btnBack.classList.remove('visible');
+
+            const btnNext = document.getElementById('btnNext');
+            const nextLabel = document.getElementById('nextLabel');
+            if (index >= currentVocabulary.length - 1 && !cameFromArticle) {
+                btnNext.classList.add('finish');
+                nextLabel.textContent = '🏆 最终挑战';
+            } else {
+                btnNext.classList.remove('finish');
+                nextLabel.textContent = '下一个';
+            }
+        }
+
+        // ========== 数字网格 ==========
+        function buildNumberGrid(activeIndex) {
+            const grid = document.getElementById('numberGrid');
+            let html = '';
+            for (let i = 0; i < currentVocabulary.length; i++) {
+                const isActive = i === activeIndex;
+                html += `<div class="grid-num${isActive ? ' active' : ''}" onclick="event.stopPropagation();jumpToWord(${i})">${i + 1}</div>`;
+            }
+            grid.innerHTML = html;
+        }
+
+        function toggleNumberGrid(event) {
+            event.stopPropagation();
+            document.getElementById('numberGrid').classList.toggle('open');
+        }
+
+        function jumpToWord(index) {
+            stopSpeaking();
+            document.getElementById('numberGrid').classList.remove('open');
+            currentIndex = index;
+            cnRevealed = false;
+            exRevealed = false;
+            renderWord(currentIndex);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.mini-progress-wrapper')) {
+                document.getElementById('numberGrid').classList.remove('open');
+            }
+        });
+
+        // ========== 切换中文 ==========
+        function toggleChinese() {
+            const cnDef = document.getElementById('cnDefinition');
+            const doodleCover = document.getElementById('doodleCover');
+            const revealBtn = document.getElementById('revealBtn');
+            cnRevealed = !cnRevealed;
+            if (cnRevealed) {
+                cnDef.classList.remove('blurred');
+                doodleCover.classList.add('fading');
+                setTimeout(() => { doodleCover.style.display = 'none'; }, 450);
+                revealBtn.textContent = '🙈 隐藏';
+                revealBtn.classList.add('showing');
+            } else {
+                cnDef.classList.add('blurred');
+                doodleCover.style.display = 'flex';
+                doodleCover.classList.remove('fading');
+                doodleCover.innerHTML = generateDoodleSVG();
+                revealBtn.textContent = '👀 显示';
+                revealBtn.classList.remove('showing');
+            }
+        }
+
+        function toggleExampleCn() {
+            const exampleCn = document.getElementById('exampleCn');
+            const doodleCoverEx = document.getElementById('doodleCoverExample');
+            const revealBtnEx = document.getElementById('revealBtnExample');
+            exRevealed = !exRevealed;
+            if (exRevealed) {
+                exampleCn.classList.remove('blurred');
+                doodleCoverEx.classList.add('fading');
+                setTimeout(() => { doodleCoverEx.style.display = 'none'; }, 450);
+                revealBtnEx.textContent = '🙈 隐藏';
+                revealBtnEx.classList.add('showing');
+            } else {
+                exampleCn.classList.add('blurred');
+                doodleCoverEx.style.display = 'flex';
+                doodleCoverEx.classList.remove('fading');
+                doodleCoverEx.innerHTML = generateSmallDoodleSVG();
+                revealBtnEx.textContent = '👀 显示翻译';
+                revealBtnEx.classList.remove('showing');
+            }
+        }
+
+        // ========== 导航 ==========
+        function nextWord() {
+            stopSpeaking();
+            if (currentIndex < currentVocabulary.length - 1) {
+                currentIndex++;
+                cnRevealed = false; exRevealed = false;
+                renderWord(currentIndex);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else if (cameFromArticle) {
+                currentIndex = 0;
+                cnRevealed = false; exRevealed = false;
+                renderWord(currentIndex);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                markHistoryCompleted();
+                cameFromArticle = false;
+                document.getElementById('btnBackArticle').classList.remove('visible');
+                showCompletePage();
+            }
+        }
+
+        function prevWord() {
+            stopSpeaking();
+            if (currentIndex > 0) {
+                currentIndex--;
+                cnRevealed = false; exRevealed = false;
+                renderWord(currentIndex);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else if (cameFromArticle) {
+                currentIndex = currentVocabulary.length - 1;
+                cnRevealed = false; exRevealed = false;
+                renderWord(currentIndex);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        // ========== 页面切换 ==========
+        function goToCover() {
+            stopSpeaking();
+            cameFromArticle = false;
+            document.getElementById('btnBackArticle').classList.remove('visible');
+            hideAllPages();
+            document.getElementById('coverPage').style.display = 'flex';
+            renderHistory();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showCompletePage() {
+            stopSpeaking();
+            hideAllPages();
+            document.getElementById('completePage').style.display = 'flex';
+            document.getElementById('completePage').classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function goToChallenge() {
+            stopSpeaking();
+            cameFromArticle = false;
+            document.getElementById('btnBackArticle').classList.remove('visible');
+            hideAllPages();
+            document.getElementById('challengePage').style.display = 'flex';
+            document.getElementById('challengePage').classList.add('active');
+            renderArticle();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function restart() {
+            stopSpeaking();
+            currentIndex = 0;
+            cnRevealed = false; exRevealed = false;
+            cameFromArticle = false;
+            document.getElementById('btnBackArticle').classList.remove('visible');
+            hideAllPages();
+            document.getElementById('coverPage').style.display = 'flex';
+            renderHistory();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function hideAllPages() {
+            ['coverPage', 'learnPage', 'completePage', 'challengePage', 'listenPage'].forEach(id => {
+                const el = document.getElementById(id);
+                el.style.display = 'none';
+                el.classList.remove('active');
+            });
+        }
+
+        // ========== 最终挑战文章（动态生成） ==========
+        function renderArticle() {
+            const allTerms = currentVocabulary.map(v => v.en);
+            document.getElementById('bankTags').innerHTML = allTerms.map(t =>
+                `<span class="bank-tag" onclick="onBankTagClick('${escapeHtml(t)}')">${escapeHtml(t)}</span>`
+            ).join('');
+
+            const pool = [...currentVocabulary];
+            const take = () => pool.length > 0 ? pool.splice(Math.floor(Math.random() * pool.length), 1)[0] : null;
+            const use = (w) => {
+                if (!w) return null;
+                return `<span class="word-highlight" data-term="${escapeHtml(w.en)}" onclick="event.stopPropagation();onHighlightClick('${escapeHtml(w.en)}')">${escapeHtml(w.en)}</span>`;
+            };
+
+            const paras = [];
+
+            function fillTemplate(tpl) {
+                let html = tpl.replace(/\[W\]/g, () => {
+                    const w = take();
+                    return w ? use(w) : '';
+                });
+                // 清理词汇耗尽后的多余空格
+                html = html.replace(/\s{2,}/g, ' ').replace(/\s([.,;:!?])/g, '$1').trim();
+                return html;
+            }
+
+            paras.push(fillTemplate(`In today's world, we must [W] for better policies and [W] resources wisely to [W] the negative trends. Experts [W] that constant criticism can [W] confidence, so a new [W] is needed.`));
+            paras.push(fillTemplate(`There is a growing [W] that climate action is urgent. The government must [W] funds to address this crisis. Critics argue current measures are [W] and we must not [W] the severity of the situation. Taking action is now [W].`));
+            paras.push(fillTemplate(`Education is an [W] part of social progress. Schools should [W] creativity rather than [W] it with rigid rules. Many children are [W] to online dangers, making digital literacy [W]. Teachers must [W] on how to protect students.`));
+            paras.push(fillTemplate(`Economic growth often [W] environmental damage. We must find ways to [W] the negative effects. A [W] plan is needed, one that does not [W] natural resources. Some companies have begun to [W] such measures with [W] results.`));
+            paras.push(fillTemplate(`Public opinion has begun to [W] on this issue, and the evidence [W] immediate reform. Many still [W] outdated beliefs, making progress difficult. We must [W] the barriers and find [W] solutions to move forward.`));
+            paras.push(fillTemplate(`Technology is now [W] in modern life, with [W] changes happening daily. The [W] volume of data can feel [W]. Experts [W] for better regulation to [W] users from harm while encouraging innovation.`));
+            paras.push(fillTemplate(`The crisis was an [W] event that [W] major disruption worldwide. It created a new [W] for public health. Many systems were [W] to handle the surge. We must learn from this to [W] our defences for the future.`));
+            paras.push(fillTemplate(`Scholars [W] that without change, society will [W] further. The [W] between rich and poor continues to grow. History shows us that [W] moments can [W] lasting transformation when people come together.`));
+
+            // Remaining words
+            if (pool.length > 0) {
+                const remaining = pool.map(w => use(w)).filter(Boolean).join(', ');
+                if (remaining) {
+                    paras.push(`Additional important concepts include: ${remaining}. These also shape our understanding of the issues discussed above.`);
+                }
+            }
+
+            const articleHTML = `<h3>🌍 Global Challenges and Opportunities</h3>`
+                + paras.map(p => {
+                    // Wrap plain words in each paragraph with click handlers
+                    let result = '';
+                    let lastIdx = 0;
+                    const regex = /<span class="word-highlight"[^>]*>.*?<\/span>/g;
+                    let match;
+                    while ((match = regex.exec(p)) !== null) {
+                        if (match.index > lastIdx) result += wrapPlainWords(p.slice(lastIdx, match.index));
+                        result += match[0];
+                        lastIdx = match.index + match[0].length;
+                    }
+                    if (lastIdx < p.length) result += wrapPlainWords(p.slice(lastIdx));
+                    return `<p>${result}</p>`;
+                }).join('');
+
+            document.getElementById('articleCard').innerHTML = articleHTML;
+        }
+
+        // ========== 语音朗读 ==========
+        let currentUtterance = null;
+        let currentSpeakerBtn = null;
+
+        function stopSpeaking() {
+            if (currentUtterance || listenIsPlaying) {
+                speechSynthesis.cancel();
+            }
+            cleanupSpeech();
+            if (listenIsPlaying) stopListenPlay();
+        }
+
+        function speak(text, btnId) {
+            // 如果正在朗读同一内容，则停止
+            if (currentUtterance && currentSpeakerBtn && currentSpeakerBtn.id === btnId) {
+                stopSpeaking();
+                return;
+            }
+
+            // 停止之前的朗读
+            stopSpeaking();
+
+            // 清理文本中的 HTML 标签
+            const cleanText = text.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, '');
+
+            if (!cleanText.trim()) return;
+
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.9;
+            utterance.pitch = 1;
+
+            const voices = speechSynthesis.getVoices();
+            const enVoice = voices.find(v => v.lang === 'en-US' && v.name.includes('Google'))
+                || voices.find(v => v.lang === 'en-US')
+                || voices.find(v => v.lang.startsWith('en'));
+            if (enVoice) utterance.voice = enVoice;
+
+            const btn = document.getElementById(btnId);
+            if (btn) {
+                currentSpeakerBtn = btn;
+                btn.classList.add('speaking');
+            }
+
+            // 仅文章朗读时显示提示
+            if (btnId === 'speakerArticle') {
+                const hint = document.getElementById('articleSpeakingHint');
+                if (hint) hint.style.display = 'inline';
+            }
+
+            utterance.onend = () => {
+                cleanupSpeech();
+            };
+
+            utterance.onerror = () => {
+                cleanupSpeech();
+            };
+
+            currentUtterance = utterance;
+            speechSynthesis.speak(utterance);
+        }
+
+        function cleanupSpeech() {
+            if (currentSpeakerBtn) {
+                currentSpeakerBtn.classList.remove('speaking');
+                currentSpeakerBtn = null;
+            }
+            currentUtterance = null;
+            const hint = document.getElementById('articleSpeakingHint');
+            if (hint) hint.style.display = 'none';
+        }
+
+        function speakWord() {
+            const word = document.getElementById('wordEnglish').textContent;
+            speak(word, 'speakerWord');
+        }
+
+        function speakDefinition() {
+            const def = document.getElementById('enDefinition').textContent || document.getElementById('enDefinition').innerText;
+            speak(def, 'speakerDef');
+        }
+
+        function speakExample() {
+            const example = document.getElementById('exampleEn').textContent;
+            speak(example, 'speakerExample');
+        }
+
+        function speakArticle() {
+            const article = document.getElementById('articleCard');
+            if (!article) return;
+            const text = article.textContent;
+            document.getElementById('articleSpeakingHint').style.display = 'inline';
+            speak(text, 'speakerArticle');
+        }
+
+        // 预加载语音列表
+        if ('speechSynthesis' in window) {
+            speechSynthesis.getVoices();
+            speechSynthesis.onvoiceschanged = () => { speechSynthesis.getVoices(); };
+        }
+
+        // ========== 键盘导航 ==========
+        document.addEventListener('keydown', (e) => {
+            const learnVisible = document.getElementById('learnPage').style.display === 'flex';
+            if (!learnVisible) return;
+            if (e.key === 'ArrowRight') { e.preventDefault(); nextWord(); }
+            else if (e.key === 'ArrowLeft') { e.preventDefault(); prevWord(); }
+            else if (e.key === ' ') { e.preventDefault(); toggleChinese(); }
+            else if (e.key === 'ArrowUp') { e.preventDefault(); toggleExampleCn(); }
+        });
+
+        // ========== 初始化 ==========
+        renderHistory();
+    </script>
+</body>
+</html>
