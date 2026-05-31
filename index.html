@@ -1508,26 +1508,42 @@
             return used;
         }
 
-        // 从主词库中选取 N 个未曾使用的词汇
+        // 真题例句索引（14条来自剑桥雅思真题系列）
+        const REAL_EXAM_INDICES = new Set([0, 10, 12, 13, 24, 27, 33, 45, 52, 55, 64, 80, 88, 96]);
+
+        // 从主词库中选取 N 个未曾使用的词汇（确保 ≥10% 来自雅思真题）
         function pickNewWords(count) {
             const used = getUsedWordIndices();
             const available = [];
+            const realExamAvail = [];
             masterVocabulary.forEach((_, i) => {
-                if (!used.has(i)) available.push(i);
+                if (!used.has(i)) {
+                    available.push(i);
+                    if (REAL_EXAM_INDICES.has(i)) realExamAvail.push(i);
+                }
             });
 
-            // 如果可用词汇不足，则重置历史（所有词都可以用）
+            // 如果可用词汇不足，则重置历史
             if (available.length < count) {
                 if (confirm('所有词汇都已学过！是否清除历史记录以重新开始？')) {
                     localStorage.removeItem('ielts_history');
                     return pickNewWords(count);
                 }
-                // 用户拒绝清除，就用所有可用的
             }
 
-            // 随机打乱可用索引
+            // 至少 10% 必须来自雅思真题（30个中至少3个）
+            const minReal = Math.max(1, Math.floor(count / 10));
             const shuffled = [...available].sort(() => Math.random() - 0.5);
-            return shuffled.slice(0, Math.min(count, available.length));
+            const shuffledReal = [...realExamAvail].sort(() => Math.random() - 0.5);
+
+            const selected = new Set();
+            const realToTake = Math.min(minReal, shuffledReal.length);
+            for (let i = 0; i < realToTake; i++) selected.add(shuffledReal[i]);
+            for (const idx of shuffled) {
+                if (selected.size >= count) break;
+                selected.add(idx);
+            }
+            return [...selected].sort(() => Math.random() - 0.5);
         }
 
         // 根据词汇索引数组构建当前词汇表
