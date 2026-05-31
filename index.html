@@ -2078,16 +2078,277 @@
             return `<svg viewBox="0 0 360 50" xmlns="http://www.w3.org/2000/svg">${shuffled.slice(0, count).join('')}</svg>`;
         }
 
+        // ========== 词形变化生成 ==========
+        // 常见不规则动词表（base → 其他形式）
+        const IRREGULAR_VERBS = {
+            'be': ['is', 'am', 'are', 'was', 'were', 'been', 'being'],
+            'have': ['has', 'had', 'having'],
+            'do': ['does', 'did', 'done', 'doing'],
+            'go': ['goes', 'went', 'gone', 'going'],
+            'make': ['makes', 'made', 'making'],
+            'take': ['takes', 'took', 'taken', 'taking'],
+            'keep': ['keeps', 'kept', 'keeping'],
+            'fall': ['falls', 'fell', 'fallen', 'falling'],
+            'run': ['runs', 'ran', 'running'],
+            'bring': ['brings', 'brought', 'bringing'],
+            'come': ['comes', 'came', 'coming'],
+            'set': ['sets', 'setting'],
+            'put': ['puts', 'putting'],
+            'shed': ['sheds', 'shedding'],
+            'wear': ['wears', 'wore', 'worn', 'wearing'],
+            'stand': ['stands', 'stood', 'standing'],
+            'lose': ['loses', 'lost', 'losing'],
+            'dwell': ['dwells', 'dwelt', 'dwelled', 'dwelling'],
+            'veer': ['veers', 'veering', 'veered'],
+            'spark': ['sparks', 'sparking', 'sparked'],
+            'wreak': ['wreaks', 'wreaking', 'wreaked'],
+            'zero': ['zeroes', 'zeros', 'zeroing', 'zeroed'],
+            'seek': ['seeks', 'sought', 'seeking'],
+            'give': ['gives', 'gave', 'given', 'giving'],
+            'get': ['gets', 'got', 'gotten', 'getting'],
+            'see': ['sees', 'saw', 'seen', 'seeing'],
+            'know': ['knows', 'knew', 'known', 'knowing'],
+            'think': ['thinks', 'thought', 'thinking'],
+            'find': ['finds', 'found', 'finding'],
+            'tell': ['tells', 'told', 'telling'],
+            'say': ['says', 'said', 'saying'],
+            'become': ['becomes', 'became', 'becoming'],
+            'leave': ['leaves', 'left', 'leaving'],
+            'feel': ['feels', 'felt', 'feeling'],
+            'mean': ['means', 'meant', 'meaning'],
+            'pay': ['pays', 'paid', 'paying'],
+            'speak': ['speaks', 'spoke', 'spoken', 'speaking'],
+            'write': ['writes', 'wrote', 'written', 'writing'],
+            'spend': ['spends', 'spent', 'spending'],
+            'begin': ['begins', 'began', 'begun', 'beginning'],
+            'lead': ['leads', 'led', 'leading'],
+            'build': ['builds', 'built', 'building'],
+            'draw': ['draws', 'drew', 'drawn', 'drawing'],
+            'grow': ['grows', 'grew', 'grown', 'growing'],
+            'rise': ['rises', 'rose', 'risen', 'rising'],
+            'drive': ['drives', 'drove', 'driven', 'driving'],
+            'hold': ['holds', 'held', 'holding'],
+            'win': ['wins', 'won', 'winning'],
+            'sell': ['sells', 'sold', 'selling'],
+            'buy': ['buys', 'bought', 'buying'],
+            'cut': ['cuts', 'cutting'],
+            'let': ['lets', 'letting'],
+            'hit': ['hits', 'hitting'],
+            'cost': ['costs', 'costing'],
+            'hurt': ['hurts', 'hurting'],
+            'shut': ['shuts', 'shutting'],
+            'spread': ['spreads', 'spreading'],
+        };
+
+        function inflectWord(word) {
+            const forms = new Set();
+            forms.add(word);
+            const w = word.toLowerCase();
+
+            // 先查不规则动词表
+            if (IRREGULAR_VERBS[w]) {
+                for (const irr of IRREGULAR_VERBS[w]) {
+                    forms.add(irr);
+                    // 首字母大写形式
+                    forms.add(irr.charAt(0).toUpperCase() + irr.slice(1));
+                }
+            }
+
+            // 规则变化: +s (复数/第三人称单数)
+            forms.add(word + 's');
+
+            // +es (以 s/x/z/ch/sh/o 结尾)
+            if (w.endsWith('s') || w.endsWith('x') || w.endsWith('z') ||
+                w.endsWith('ch') || w.endsWith('sh') || w.endsWith('o')) {
+                forms.add(word + 'es');
+            }
+
+            // 辅音+y → ies
+            if (w.length > 2 && w.endsWith('y') && !'aeiou'.includes(w[w.length - 2])) {
+                forms.add(word.slice(0, -1) + 'ies');
+            }
+
+            // 过去式/过去分词: +ed, +d
+            forms.add(word + 'ed');
+            forms.add(word + 'd');
+
+            // 重读闭音节双写辅音 +ed/+ing
+            if (w.length >= 2) {
+                const last = w[w.length - 1];
+                const secondLast = w[w.length - 2];
+                const thirdLast = w.length >= 3 ? w[w.length - 3] : '';
+                if ('bcdfghjklmnpqrstvwxyz'.includes(last) &&
+                    'aeiou'.includes(secondLast) &&
+                    !'aeiou'.includes(thirdLast || 'a')) {
+                    forms.add(word + last + 'ed');
+                    forms.add(word + last + 'ing');
+                    forms.add(word + last + 'er');
+                    forms.add(word + last + 'est');
+                }
+            }
+
+            // 现在分词: +ing
+            forms.add(word + 'ing');
+            // 去掉 e + ing
+            if (w.endsWith('e') && w.length > 2 && !w.endsWith('ee')) {
+                forms.add(word.slice(0, -1) + 'ing');
+            }
+
+            // 比较级/最高级: +er, +est
+            forms.add(word + 'er');
+            forms.add(word + 'est');
+            if (w.endsWith('e') && w.length > 2) {
+                forms.add(word + 'r');
+                forms.add(word + 'st');
+            }
+
+            // 副词: +ly
+            forms.add(word + 'ly');
+            if (w.endsWith('ic')) {
+                forms.add(word + 'ally');
+            }
+            if (w.endsWith('le') && w.length > 2) {
+                forms.add(word.slice(0, -2) + 'ly');
+            }
+            // 辅音+y → ily
+            if (w.length > 2 && w.endsWith('y') && !'aeiou'.includes(w[w.length - 2])) {
+                forms.add(word.slice(0, -1) + 'ily');
+            }
+
+            // 名词后缀
+            forms.add(word + 'ness');
+            if (w.endsWith('y') && w.length > 2 && !'aeiou'.includes(w[w.length - 2])) {
+                forms.add(word.slice(0, -1) + 'iness');
+            }
+            forms.add(word + 'ment');
+            forms.add(word + 'tion');
+            forms.add(word + 'sion');
+            if (w.endsWith('e') && w.length > 2) {
+                forms.add(word.slice(0, -1) + 'ation');
+                forms.add(word.slice(0, -1) + 'ition');
+            }
+
+            // 形容词后缀
+            forms.add(word + 'able');
+            forms.add(word + 'ible');
+            forms.add(word + 'ful');
+            forms.add(word + 'less');
+            forms.add(word + 'ous');
+            forms.add(word + 'ive');
+            forms.add(word + 'al');
+
+            return [...forms];
+        }
+
+        function inflectTerm(term) {
+            const forms = new Set();
+            forms.add(term); // 原形
+
+            const words = term.split(' ');
+            if (words.length === 1) {
+                // 单个单词：生成所有屈折形式
+                for (const form of inflectWord(term)) {
+                    forms.add(form);
+                }
+            } else {
+                // 短语：变化第一个单词（通常是动词）
+                const firstWord = words[0];
+                const rest = words.slice(1).join(' ');
+                for (const inflected of inflectWord(firstWord)) {
+                    forms.add(inflected + ' ' + rest);
+                }
+                // 也尝试变化第二个单词（某些短语动词可能第二个词是主要动词）
+                // 例如 "go hand in hand" 中 go 是动词
+                // 对于 "keep at bay" 等，第一词就是动词，无需额外处理
+            }
+
+            return [...forms];
+        }
+
+        // ========== 短语近邻匹配（允许短语单词之间夹着其他词） ==========
+        function findPhraseProximitySpans(text, term, maxGap = 4) {
+            // 将文本按单词拆分，记录每个单词的位置
+            const tokens = [];
+            const tokenRegex = /\S+/g;
+            let m;
+            while ((m = tokenRegex.exec(text)) !== null) {
+                tokens.push({ word: m[0], start: m.index, end: m.index + m[0].length });
+            }
+
+            const phraseWords = term.split(' ');
+            if (phraseWords.length < 2) return null;
+
+            // 为短语中每个单词生成所有屈折形式
+            const phraseVariants = phraseWords.map(w => {
+                const forms = inflectWord(w).map(v => v.toLowerCase().replace(/[^a-z']/g, ''));
+                return [...new Set(forms)];
+            });
+
+            // 遍历每个 token，尝试匹配短语的第一个词
+            for (let i = 0; i < tokens.length; i++) {
+                const tokenClean = tokens[i].word.toLowerCase().replace(/[^a-z']/g, '');
+                if (!phraseVariants[0].includes(tokenClean)) continue;
+
+                const spans = [{ start: tokens[i].start, end: tokens[i].end }];
+                let phraseWordIdx = 1;
+                let gapCount = 0;
+
+                for (let j = i + 1; j < tokens.length && phraseWordIdx < phraseWords.length; j++) {
+                    const tClean = tokens[j].word.toLowerCase().replace(/[^a-z']/g, '');
+                    if (phraseVariants[phraseWordIdx].includes(tClean)) {
+                        spans.push({ start: tokens[j].start, end: tokens[j].end });
+                        phraseWordIdx++;
+                        gapCount = 0;
+                    } else {
+                        gapCount++;
+                        if (gapCount > maxGap) break;
+                    }
+                }
+
+                if (phraseWordIdx === phraseWords.length) {
+                    return spans;
+                }
+            }
+
+            return null;
+        }
+
         // ========== 文本高亮与可点击词 ==========
         function renderTextWithHighlights(text, highlightTerms, clickable = true) {
             const textLower = text.toLowerCase();
             const highlights = [];
+            const seenSpans = new Set(); // 去重：同一位置只保留最长匹配
             for (const term of highlightTerms) {
-                const termLower = term.toLowerCase();
-                let idx = 0;
-                while ((idx = textLower.indexOf(termLower, idx)) !== -1) {
-                    highlights.push({ start: idx, end: idx + term.length, term: term });
-                    idx += term.length;
+                const variants = inflectTerm(term);
+                let foundExact = false;
+
+                // Phase 1: 精确变体匹配（含词形变化）
+                for (const variant of variants) {
+                    const variantLower = variant.toLowerCase();
+                    let idx = 0;
+                    while ((idx = textLower.indexOf(variantLower, idx)) !== -1) {
+                        const key = idx + ':' + (idx + variant.length);
+                        if (!seenSpans.has(key)) {
+                            highlights.push({ start: idx, end: idx + variant.length, term: term });
+                            seenSpans.add(key);
+                        }
+                        idx += variant.length;
+                        foundExact = true;
+                    }
+                }
+
+                // Phase 2: 多词短语——若精确匹配未找到，尝试近邻匹配（允许夹词）
+                if (!foundExact && term.includes(' ')) {
+                    const proximitySpans = findPhraseProximitySpans(text, term);
+                    if (proximitySpans) {
+                        for (const span of proximitySpans) {
+                            const key = span.start + ':' + span.end;
+                            if (!seenSpans.has(key)) {
+                                highlights.push({ start: span.start, end: span.end, term: term });
+                                seenSpans.add(key);
+                            }
+                        }
+                    }
                 }
             }
             highlights.sort((a, b) => a.start - b.start || b.end - a.end);
