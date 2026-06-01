@@ -2406,7 +2406,7 @@
             let pos = 0;
             for (const h of merged) {
                 if (pos < h.start) result += wrapPlainWords(text.slice(pos, h.start));
-                const onclick = clickable ? ` onclick="event.stopPropagation();onHighlightClick('${escapeHtml(h.term)}')"` : '';
+                const onclick = clickable ? ` onclick="event.stopPropagation();onHighlightClick('${escapeJsString(escapeHtml(h.term))}')"` : '';
                 result += `<span class="word-highlight" data-term="${escapeHtml(h.term)}"${onclick}>${escapeHtml(text.slice(h.start, h.end))}</span>`;
                 pos = h.end;
             }
@@ -2416,7 +2416,9 @@
 
         function wrapPlainWords(text) {
             return text.replace(/([a-zA-Z]+(?:'[a-zA-Z]+)?)/g, (match) => {
-                return `<span class="word-clickable" data-word="${escapeHtml(match)}" onclick="event.stopPropagation();onWordClick(event, '${escapeHtml(match)}')">${escapeHtml(match)}</span>`;
+                const safeHtml = escapeHtml(match);
+                const safeJs = escapeJsString(safeHtml);
+                return `<span class="word-clickable" data-word="${safeHtml}" onclick="event.stopPropagation();onWordClick(event, '${safeJs}')">${safeHtml}</span>`;
             });
         }
 
@@ -2424,6 +2426,11 @@
             const div = document.createElement('div');
             div.textContent = str;
             return div.innerHTML;
+        }
+
+        // 转义单引号，用于嵌入 JavaScript 单引号字符串（如 onclick="...'...'"）
+        function escapeJsString(str) {
+            return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
         }
 
         // ========== 词译弹窗 ==========
@@ -2541,7 +2548,10 @@
             tooltip.style.maxWidth = '280px';
             const tooltipWidth = Math.min(tooltip.offsetWidth || 180, 280);
             const left = Math.min(Math.max(rect.left + rect.width / 2 - tooltipWidth / 2, 10), window.innerWidth - tooltipWidth - 10);
-            const top = rect.top - 60;
+            // 优先显示在单词上方，若空间不足则显示在下方
+            const tooltipHeight = tooltip.offsetHeight || 50;
+            let top = rect.top - tooltipHeight - 8;
+            if (top < 8) top = rect.bottom + 8;
             tooltip.style.left = left + 'px';
             tooltip.style.top = top + 'px';
             tooltip.classList.add('visible');
@@ -2851,7 +2861,7 @@
             const take = () => pool.length > 0 ? pool.splice(Math.floor(Math.random() * pool.length), 1)[0] : null;
             const use = (w) => {
                 if (!w) return null;
-                return `<span class="word-highlight" data-term="${escapeHtml(w.en)}" onclick="event.stopPropagation();onHighlightClick('${escapeHtml(w.en)}')">${escapeHtml(w.en)}</span>`;
+                return `<span class="word-highlight" data-term="${escapeHtml(w.en)}" onclick="event.stopPropagation();onHighlightClick('${escapeJsString(escapeHtml(w.en))}')">${escapeHtml(w.en)}</span>`;
             };
 
             // 段落模板：英文 + 对应中文翻译（[W] 占位符会被对应的词汇/短语替换）
