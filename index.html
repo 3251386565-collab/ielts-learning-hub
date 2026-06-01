@@ -2186,6 +2186,15 @@
             'spread': ['spreads', 'spreading'],
         };
 
+        // 反向索引：屈折形式 → 原形（用于查词翻译）
+        const IRREGULAR_REVERSE = {};
+        for (const [base, forms] of Object.entries(IRREGULAR_VERBS)) {
+            for (const f of forms) {
+                IRREGULAR_REVERSE[f] = base;
+                IRREGULAR_REVERSE[f.toLowerCase()] = base;
+            }
+        }
+
         function inflectWord(word) {
             const forms = new Set();
             forms.add(word);
@@ -2437,20 +2446,42 @@
         function lookupWord(w) {
             // 1. 精确匹配
             if (dictionary[w]) return dictionary[w];
-            // 2. 去掉结尾标点
+            // 2. 去掉结尾标点后精确匹配
             const clean = w.replace(/[^a-z']/g, '');
+            if (!clean || clean.length < 2) return null;
             if (dictionary[clean]) return dictionary[clean];
-            // 3. 尝试词干形式
+            // 3. 反向不规则动词/屈折形式查找
+            const base = IRREGULAR_REVERSE[clean];
+            if (base && dictionary[base]) return dictionary[base];
+            // 4. 词干还原（后缀剥离 + 双写辅音还原）
             const tries = [];
+            // 辅助：剥离后缀并生成候选（含双写辅音还原）
+            function addStems(word, suffixLen, restoreE) {
+                const stem = word.slice(0, -suffixLen);
+                tries.push(stem);
+                if (restoreE) tries.push(stem + 'e');
+                // 双写辅音还原：running→runn→run, stopped→stopp→stop
+                if (stem.length >= 3) {
+                    const last = stem[stem.length - 1];
+                    const secondLast = stem[stem.length - 2];
+                    if (last === secondLast && 'bcdfghjklmnpqrstvwxyz'.includes(last)) {
+                        const dedoubled = stem.slice(0, -1);
+                        tries.push(dedoubled);
+                        if (restoreE) tries.push(dedoubled + 'e');
+                    }
+                }
+            }
             if (clean.endsWith('s') && !clean.endsWith('ss')) tries.push(clean.slice(0, -1));
             if (clean.endsWith('es')) tries.push(clean.slice(0, -2));
             if (clean.endsWith('ies')) tries.push(clean.slice(0, -3) + 'y');
             if (clean.endsWith('ves')) tries.push(clean.slice(0, -3) + 'f');
-            if (clean.endsWith('ing')) { tries.push(clean.slice(0, -3)); tries.push(clean.slice(0, -3) + 'e'); }
-            if (clean.endsWith('ed')) { tries.push(clean.slice(0, -2)); tries.push(clean.slice(0, -1)); tries.push(clean.slice(0, -2) + 'e'); }
-            if (clean.endsWith('er')) { tries.push(clean.slice(0, -2)); tries.push(clean.slice(0, -2) + 'e'); }
-            if (clean.endsWith('est')) { tries.push(clean.slice(0, -3)); tries.push(clean.slice(0, -3) + 'e'); }
-            if (clean.endsWith('ly')) tries.push(clean.slice(0, -2));
+            if (clean.endsWith('ing')) addStems(clean, 3, true);
+            if (clean.endsWith('ed')) { addStems(clean, 2, false); tries.push(clean.slice(0, -1)); addStems(clean, 2, true); }
+            if (clean.endsWith('er')) { addStems(clean, 2, false); addStems(clean, 2, true); }
+            if (clean.endsWith('est')) { addStems(clean, 3, false); addStems(clean, 3, true); }
+            if (clean.endsWith('ly')) { tries.push(clean.slice(0, -2)); }
+            if (clean.endsWith('ily') && clean.length > 4) tries.push(clean.slice(0, -3) + 'y');  // easily→easy
+            if (clean.endsWith('iness')) tries.push(clean.slice(0, -5) + 'y');  // happiness→happy
             if (clean.endsWith('ness')) tries.push(clean.slice(0, -4));
             if (clean.endsWith('ment')) tries.push(clean.slice(0, -4));
             if (clean.endsWith('tion')) tries.push(clean.slice(0, -4));
@@ -2468,6 +2499,9 @@
         }
 
         // ========== 翻译缓存 ==========
+        const NEGATIVE_CACHE_TTL = 30 * 60 * 1000; // 失败的词 30 分钟内不再请求 API
+        const FETCH_TIMEOUT_MS = 8000; // API 请求超时
+
         function getTranslationCache() {
             try { return JSON.parse(localStorage.getItem('word_cache') || '{}'); }
             catch (e) { return {}; }
@@ -2485,32 +2519,56 @@
             const local = lookupWord(clean);
             if (local) return local;
 
-            // 2. 缓存
+            // 2. 缓存命中（正向或负向）
             const cache = getTranslationCache();
-            if (cache[clean]) return cache[clean];
+            const cached = cache[clean];
+            if (cached) {
+                if (typeof cached === 'string' && cached.startsWith('__NEG_')) {
+                    // 负缓存：带过期时间戳，过期后允许重试
+                    const ts = parseInt(cached.slice(6), 10);
+                    if (!isNaN(ts) && Date.now() - ts < NEGATIVE_CACHE_TTL) return null;
+                    delete cache[clean]; // 过期，重试
+                } else {
+                    return cached; // 正向缓存命中
+                }
+            }
 
-            // 3. MyMemory API
+            // 3. MyMemory API（带超时）
             try {
-                const resp = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(clean)}&langpair=en|zh`);
+                const controller = new AbortController();
+                const timer = setTimeout(function () { controller.abort(); }, FETCH_TIMEOUT_MS);
+                const resp = await fetch(
+                    'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(clean) + '&langpair=en|zh',
+                    { signal: controller.signal }
+                );
+                clearTimeout(timer);
                 const data = await resp.json();
-                if (data.responseStatus === 200 && data.responseData.translatedText) {
+                if (data.responseStatus === 200 && data.responseData && data.responseData.translatedText) {
                     const translated = data.responseData.translatedText;
-                    // 去重：如果翻译结果和原文一样，标记为未知
-                    if (translated.toLowerCase() === clean.toLowerCase()) return null;
+                    // 去重：如果翻译结果和原文一样，标记为无翻译
+                    if (translated.toLowerCase() === clean.toLowerCase()) {
+                        cache[clean] = '__NEG_' + Date.now();
+                        saveTranslationCache(cache);
+                        return null;
+                    }
                     cache[clean] = translated;
                     saveTranslationCache(cache);
                     return translated;
                 }
-            } catch (e) { /* API失败 */ }
+            } catch (e) {
+                // API 失败（网络错误 / 超时 / 限流）→ 负缓存避免立刻重试
+                cache[clean] = '__NEG_' + Date.now();
+                saveTranslationCache(cache);
+            }
             return null;
         }
 
         function formatTranslation(translation) {
-            if (!translation) return '—';
+            if (!translation) return '未找到';
             // 用 | 分隔多个释义
             const parts = translation.split('|');
             if (parts.length === 1) return parts[0];
-            return parts.map((p, i) => i === 0 ? `<strong>${p}</strong>` : p).join(' · ');
+            return parts.map(function (p, i) { return i === 0 ? '<strong>' + p + '</strong>' : p; }).join(' · ');
         }
 
         function onWordClick(event, word) {
