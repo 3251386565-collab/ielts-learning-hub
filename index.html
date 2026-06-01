@@ -3196,8 +3196,256 @@
             else if (e.key === 'ArrowUp') { e.preventDefault(); toggleExampleCn(); }
         });
 
+        // ========== 每日自检：100次学习+听力，翻译自动修复 ==========
+        const SELFCHECK_INTERVAL = 24 * 60 * 60 * 1000; // 24小时
+        const SELFCHECK_SESSIONS = 100; // 每日模拟100次学习
+        const SELFCHECK_WORDS_PER_SESSION = 30;
+        let selfCheckRunning = false;
+
+        // 动态词典（自检修复的词持久化到 localStorage）
+        function getDynamicDict() {
+            try { return JSON.parse(localStorage.getItem('dynamic_dict') || '{}'); }
+            catch (e) { return {}; }
+        }
+        function saveDynamicDict(dd) {
+            try { localStorage.setItem('dynamic_dict', JSON.stringify(dd)); }
+            catch (e) {}
+        }
+
+        // 启动时加载动态词典
+        (function loadDynamicDict() {
+            var dd = getDynamicDict();
+            var count = 0;
+            for (var k in dd) {
+                if (dd.hasOwnProperty(k) && !dictionary[k]) {
+                    dictionary[k] = dd[k];
+                    count++;
+                }
+            }
+            if (count > 0) console.log('[自检] 已加载 ' + count + ' 个动态修复词条');
+        })();
+
+        // 获取历史中已学的所有单词/短语
+        function getHistoryWordsSet() {
+            var words = new Set();
+            try {
+                var vocabH = JSON.parse(localStorage.getItem('ielts_history') || '[]');
+                vocabH.forEach(function (h) {
+                    if (h.wordIndices) h.wordIndices.forEach(function (idx) {
+                        if (masterVocabulary[idx]) words.add(masterVocabulary[idx].en.toLowerCase());
+                    });
+                });
+            } catch (e) {}
+            return words;
+        }
+
+        // 选出不在历史中的词汇（每日自检不重复）
+        function pickNonHistoryVocab(count) {
+            var historyWords = getHistoryWordsSet();
+            var pool = masterVocabulary.filter(function (v) {
+                return !historyWords.has(v.en.toLowerCase());
+            });
+            // 如果可用词不够，用全部词（但标记为循环使用）
+            if (pool.length === 0) pool = masterVocabulary.slice();
+            // 随机打乱
+            for (var i = pool.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp;
+            }
+            // 取 count 个，不够则循环
+            var result = [];
+            while (result.length < count) {
+                result = result.concat(pool);
+            }
+            return result.slice(0, count);
+        }
+
+        // 从词汇条目中提取所有英文单词
+        function extractWordsFromItem(item) {
+            var wordSet = new Set();
+            var texts = [item.en, item.enDef, item.exampleEn];
+            texts.forEach(function (text) {
+                var matches = text.match(/[a-zA-Z]{2,}(?:'[a-zA-Z]+)?/g);
+                if (matches) matches.forEach(function (w) { wordSet.add(w.toLowerCase()); });
+            });
+            return [...wordSet];
+        }
+
+        // 从听力段落提取所有英文单词
+        function extractWordsFromListening() {
+            var wordSet = new Set();
+            var allPassages = listeningPassages;
+            allPassages.forEach(function (p) {
+                var texts = [p.title, p.instruction].concat(p.sentences).concat(p.questions);
+                texts.forEach(function (text) {
+                    if (typeof text === 'string') {
+                        var matches = text.match(/[a-zA-Z]{2,}(?:'[a-zA-Z]+)?/g);
+                        if (matches) matches.forEach(function (w) { wordSet.add(w.toLowerCase()); });
+                    }
+                });
+            });
+            return [...wordSet];
+        }
+
+        // 自检翻译函数（调用 Google API 获取翻译）
+        async function selfCheckFetchTranslation(word) {
+            var clean = word.toLowerCase().replace(/[^a-z]/g, '');
+            if (!clean || clean.length < 2) return null;
+            // 先查本地
+            var local = lookupWord(clean);
+            if (local) return local;
+            // 调 Google API
+            try {
+                var controller = new AbortController();
+                var timer = setTimeout(function () { controller.abort(); }, 8000);
+                var resp = await fetch(
+                    'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh&dt=t&q=' + encodeURIComponent(clean),
+                    { signal: controller.signal }
+                );
+                clearTimeout(timer);
+                var data = await resp.json();
+                if (data && data[0] && data[0][0] && data[0][0][0]) {
+                    var t = data[0].map(function (item) { return item[0]; }).filter(Boolean).join('；');
+                    if (isValidTranslation(t, clean)) return t;
+                }
+            } catch (e) {}
+            return null;
+        }
+
+        // 主自检流程
+        async function runSelfCheck(showReport) {
+            if (selfCheckRunning) { console.log('[自检] 已在运行中，跳过'); return; }
+            selfCheckRunning = true;
+
+            var state = {};
+            try { state = JSON.parse(localStorage.getItem('selfcheck_state') || '{}'); } catch (e) {}
+
+            var now = Date.now();
+            if (!showReport && state.lastRun && (now - state.lastRun) < SELFCHECK_INTERVAL) {
+                console.log('[自检] 距上次运行不足24h（上次: ' + new Date(state.lastRun).toLocaleString() + '），跳过');
+                var nextRun = new Date(state.lastRun + SELFCHECK_INTERVAL);
+                console.log('[自检] 下次可运行时间: ' + nextRun.toLocaleString());
+                selfCheckRunning = false;
+                return;
+            }
+
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.log('[自检] 🚀 开始每日翻译覆盖自检');
+            console.log('[自检] 模拟 ' + SELFCHECK_SESSIONS + ' 次学习 × ' + SELFCHECK_WORDS_PER_SESSION + ' 词 = ' + (SELFCHECK_SESSIONS * SELFCHECK_WORDS_PER_SESSION) + ' 次检查');
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+            var startTime = Date.now();
+            var totalChecked = 0;
+            var localHit = 0;
+            var apiFixed = 0;
+            var stillFailed = 0;
+            var dd = getDynamicDict();
+            var failedWords = [];
+
+            // 收集所有需要检查的单词（去重）
+            var allCheckWords = new Set();
+
+            // 1. 词汇学习部分：选出 SELFCHECK_SESSIONS 批次的词
+            var pickedVocab = pickNonHistoryVocab(SELFCHECK_SESSIONS * SELFCHECK_WORDS_PER_SESSION);
+            console.log('[自检] 词汇池: ' + pickedVocab.length + ' 个条目（' + SELFCHECK_SESSIONS + ' 批 × ~' + SELFCHECK_WORDS_PER_SESSION + ' 词）');
+
+            // 按批次处理
+            var batchCount = 0;
+            for (var si = 0; si < SELFCHECK_SESSIONS; si++) {
+                var batch = pickedVocab.slice(si * SELFCHECK_WORDS_PER_SESSION, (si + 1) * SELFCHECK_WORDS_PER_SESSION);
+                if (batch.length === 0) break;
+                batchCount++;
+
+                for (var bi = 0; bi < batch.length; bi++) {
+                    var words = extractWordsFromItem(batch[bi]);
+                    words.forEach(function (w) { allCheckWords.add(w); });
+                }
+            }
+            console.log('[自检] 词汇部分: 完成 ' + batchCount + ' 批次');
+
+            // 2. 听力练习部分
+            var listenWords = extractWordsFromListening();
+            listenWords.forEach(function (w) { allCheckWords.add(w); });
+            console.log('[自检] 听力部分: ' + listenWords.length + ' 个独立词');
+
+            // 3. 逐词检查
+            var uniqueWords = [...allCheckWords];
+            console.log('[自检] 总计独立单词: ' + uniqueWords.length);
+            console.log('[自检] 检查中...');
+
+            for (var wi = 0; wi < uniqueWords.length; wi++) {
+                var word = uniqueWords[wi];
+                totalChecked++;
+
+                var local = lookupWord(word);
+                if (local && isValidTranslation(local, word)) {
+                    localHit++;
+                    continue;
+                }
+
+                // 本地未命中 → 调用 API 修复
+                var translation = await selfCheckFetchTranslation(word);
+                if (translation) {
+                    dd[word] = translation;
+                    dictionary[word] = translation; // 写入运行时词典
+                    apiFixed++;
+                } else {
+                    stillFailed++;
+                    failedWords.push(word);
+                }
+
+                // 进度报告
+                if ((wi + 1) % 50 === 0 || wi === uniqueWords.length - 1) {
+                    console.log('[自检] 进度: ' + (wi + 1) + '/' + uniqueWords.length +
+                        ' | 命中:' + localHit + ' | 修复:' + apiFixed + ' | 失败:' + stillFailed);
+                }
+
+                // 频率控制
+                if (apiFixed > 0 || stillFailed > 0) {
+                    await new Promise(function (r) { return setTimeout(r, 150); });
+                }
+            }
+
+            // 保存动态词典
+            saveDynamicDict(dd);
+
+            // 完成报告
+            var elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+            var coverage = totalChecked > 0 ? ((localHit / totalChecked) * 100).toFixed(1) : '0';
+
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+            console.log('[自检] ✅ 完成！耗时: ' + elapsed + 's');
+            console.log('[自检] 📊 报告:');
+            console.log('[自检]   独立单词: ' + totalChecked);
+            console.log('[自检]   本地命中: ' + localHit + ' (' + coverage + '%)');
+            console.log('[自检]   API修复:  ' + apiFixed);
+            console.log('[自检]   仍然失败: ' + stillFailed);
+            if (failedWords.length > 0) {
+                console.log('[自检]   失败词: ' + failedWords.join(', '));
+            }
+            console.log('[自检]   动态词典: ' + Object.keys(dd).length + ' 词条');
+            console.log('[自检]   下次自检: ' + new Date(now + SELFCHECK_INTERVAL).toLocaleString());
+            console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+            // 保存状态
+            state.lastRun = now;
+            state.lastResult = { checked: totalChecked, localHit: localHit, apiFixed: apiFixed, stillFailed: stillFailed, elapsed: elapsed };
+            try { localStorage.setItem('selfcheck_state', JSON.stringify(state)); } catch (e) {}
+
+            selfCheckRunning = false;
+            return state.lastResult;
+        }
+
         // ========== 初始化 ==========
         renderHistory();
+
+        // 页面加载后延迟触发自检（避免阻塞UI）
+        setTimeout(function () {
+            runSelfCheck(false).catch(function (e) {
+                console.error('[自检] 异常:', e);
+                selfCheckRunning = false;
+            });
+        }, 3000);
     </script>
 </body>
 </html>
