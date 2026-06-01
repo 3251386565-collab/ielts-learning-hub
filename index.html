@@ -2504,6 +2504,19 @@
         const NEGATIVE_CACHE_TTL = 2 * 60 * 1000; // 失败的词 2 分钟后允许重试
         const FETCH_TIMEOUT_MS = 8000; // API 请求超时
 
+        // 验证翻译结果是否有效（排除纯标点/纯空白/单字符非中文）
+        function isValidTranslation(text, original) {
+            if (!text || typeof text !== 'string') return false;
+            var trimmed = text.trim();
+            if (trimmed.length === 0) return false;
+            if (trimmed === original) return false;
+            // 排除纯标点符号
+            if (/^[.,;:!?。，；：！？、…\s\-—(){}\[\]<>《》【】「」『』""''\`\~@#$%^&*+=|/\\]+$/.test(trimmed)) return false;
+            // 排除单字符且非中文
+            if (trimmed.length === 1 && !/[一-鿿]/.test(trimmed)) return false;
+            return true;
+        }
+
         function getTranslationCache() {
             try { return JSON.parse(localStorage.getItem('word_cache') || '{}'); }
             catch (e) { return {}; }
@@ -2539,7 +2552,6 @@
 
             // 3. MyMemory API（带超时）
             let translated = null;
-            let mymemoryFailed = false;
             try {
                 const controller = new AbortController();
                 const timer = setTimeout(function () { controller.abort(); }, FETCH_TIMEOUT_MS);
@@ -2550,15 +2562,14 @@
                 clearTimeout(timer);
                 const data = await resp.json();
                 if (data.responseStatus === 200 && data.responseData && data.responseData.translatedText) {
-                    const t = data.responseData.translatedText;
-                    // 只有翻译结果和原文不同时才接受（避免 MyMemory 返回原词阻塞 Google）
-                    if (t.toLowerCase() !== clean.toLowerCase()) {
+                    var t = data.responseData.translatedText;
+                    // 验证翻译质量：拒绝纯标点/无意义结果
+                    if (isValidTranslation(t, clean)) {
                         translated = t;
-                    } else {
-                        mymemoryFailed = true; // MyMemory 无法翻译，继续尝试 Google
                     }
+                    // 无效结果 → 继续尝试 Google
                 }
-            } catch (e) { mymemoryFailed = true; /* MyMemory 失败，继续尝试下一级 */ }
+            } catch (e) { /* MyMemory 失败，继续尝试下一级 */ }
 
             // 4. Google Translate 兜底（免费，无需 API Key）
             if (!translated) {
@@ -2573,9 +2584,9 @@
                     const gdata = await gresp.json();
                     // Google 返回格式：[[["翻译","word",...], ...], null, "en"]
                     if (gdata && gdata[0] && gdata[0][0] && gdata[0][0][0]) {
-                        const t = gdata[0].map(function (item) { return item[0]; }).filter(Boolean).join(' | ');
-                        if (t && t.toLowerCase() !== clean.toLowerCase()) {
-                            translated = t;
+                        var t2 = gdata[0].map(function (item) { return item[0]; }).filter(Boolean).join(' | ');
+                        if (isValidTranslation(t2, clean)) {
+                            translated = t2;
                         }
                     }
                 } catch (e2) { /* Google 也失败 */ }
