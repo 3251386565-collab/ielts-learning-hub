@@ -2534,6 +2534,7 @@
             }
 
             // 3. MyMemory API（带超时）
+            let translated = null;
             try {
                 const controller = new AbortController();
                 const timer = setTimeout(function () { controller.abort(); }, FETCH_TIMEOUT_MS);
@@ -2544,22 +2545,43 @@
                 clearTimeout(timer);
                 const data = await resp.json();
                 if (data.responseStatus === 200 && data.responseData && data.responseData.translatedText) {
-                    const translated = data.responseData.translatedText;
-                    // 去重：如果翻译结果和原文一样，标记为无翻译
-                    if (translated.toLowerCase() === clean.toLowerCase()) {
-                        cache[clean] = '__NEG_' + Date.now();
-                        saveTranslationCache(cache);
-                        return null;
-                    }
-                    cache[clean] = translated;
-                    saveTranslationCache(cache);
-                    return translated;
+                    translated = data.responseData.translatedText;
                 }
-            } catch (e) {
-                // API 失败（网络错误 / 超时 / 限流）→ 负缓存避免立刻重试
-                cache[clean] = '__NEG_' + Date.now();
-                saveTranslationCache(cache);
+            } catch (e) { /* MyMemory 失败，继续尝试下一级 */ }
+
+            // 4. Google Translate 兜底（免费，无需 API Key）
+            if (!translated) {
+                try {
+                    const controller2 = new AbortController();
+                    const timer2 = setTimeout(function () { controller2.abort(); }, FETCH_TIMEOUT_MS);
+                    const gresp = await fetch(
+                        'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh&dt=t&q=' + encodeURIComponent(clean),
+                        { signal: controller2.signal }
+                    );
+                    clearTimeout(timer2);
+                    const gdata = await gresp.json();
+                    // Google 返回格式：[[["翻译","word",...], ...], null, "en"]
+                    if (gdata && gdata[0] && gdata[0][0] && gdata[0][0][0]) {
+                        translated = gdata[0].map(function (item) { return item[0]; }).join(' | ');
+                    }
+                } catch (e2) { /* Google 也失败 */ }
             }
+
+            // 5. 处理结果
+            if (translated) {
+                if (translated.toLowerCase() === clean.toLowerCase()) {
+                    cache[clean] = '__NEG_' + Date.now();
+                    saveTranslationCache(cache);
+                    return null;
+                }
+                cache[clean] = translated;
+                saveTranslationCache(cache);
+                return translated;
+            }
+
+            // 6. 两级 API 均失败 → 负缓存
+            cache[clean] = '__NEG_' + Date.now();
+            saveTranslationCache(cache);
             return null;
         }
 
