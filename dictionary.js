@@ -1,4 +1,4 @@
-// 高质量英中词典 — 覆盖全站内容，优先显示文中意
+﻿// 高质量英中词典 — 覆盖全站内容，优先显示文中意
 const dictionary = {
 // ===== 代词/冠词/介词/连词 =====
 "a":"一个","an":"一个","the":"这；那；该","i":"我","you":"你；你们","he":"他","she":"她","it":"它",
@@ -434,7 +434,58 @@ const dictionary = {
 "percent":"百分比","million":"百万","billion":"十亿","zero":"零",
 "one":"一；一个","two":"二；两个","three":"三","four":"四","five":"五",
 "six":"六","seven":"七","eight":"八","nine":"九","ten":"十",
-"hundred":"百","thousand":"千"
+"hundred":"百","thousand":"千",
+
+	// ===== 站点内容全覆盖词（确保每个单词都有翻译） =====
+	"across":"穿过；横跨","after":"在…之后；以后","ahead":"在前面；向前",
+	"almost":"几乎；差不多","anyone":"任何人","are":"是（be的复数形式）",
+	"attic":"阁楼；顶楼","became":"成为（become过去式）","been":"是（be的过去分词）",
+	"began":"开始（begin过去式）","behind":"在…后面；落后",
+	"belief":"信念；信仰","believed":"相信（过去式）","believing":"相信（进行时）",
+	"belonged":"属于（过去式）","better":"更好的；更好地","calling":"呼唤；打电话",
+	"came":"来（come过去式）","can":"能；可以；罐头","children":"孩子们",
+	"choice":"选择","chose":"选择（choose过去式）","closed":"关闭的；关闭",
+	"clue":"线索；提示","communities":"社区（复数）","could":"能够；可能",
+	"countries":"国家（复数）","crops":"农作物；庄稼","curiosity":"好奇心",
+	"decided":"决定（过去式）","deeper":"更深的；更深地","described":"描述（过去式）",
+	"destroyed":"摧毁（过去式）","did":"做（do过去式）","differently":"不同地",
+	"does":"做（do第三人称）","dream":"梦想；梦","dreams":"梦想（复数）",
+	"dusty":"布满灰尘的","easier":"更容易的","even":"甚至；即使",
+	"everyone":"每个人","everything":"一切；每件事","experts":"专家（复数）",
+	"feed":"喂养；供给","felt":"感觉（feel过去式）","finding":"发现；调查结果",
+	"forty":"四十","found":"发现（find过去式）","goals":"目标（复数）",
+	"going":"去；进行中的","gone":"离去（go的过去分词）","grandfather":"祖父；爷爷",
+	"grandmother":"祖母；奶奶","grew":"生长（grow过去式）","groups":"群体；组（复数）",
+	"had":"有（have过去式）","happened":"发生（过去式）","has":"有（have第三人称）",
+	"held":"握住（hold过去式）","hundreds":"数百","hunger":"饥饿；渴望",
+	"impossible":"不可能的","inspire":"激励；启发","is":"是（be第三人称）",
+	"journey":"旅程；旅途","judgment":"判断；裁决","just":"仅仅；刚刚；公正的",
+	"kept":"保持（keep过去式）","knew":"知道（know过去式）","lands":"土地（复数）；登陆",
+	"learned":"学习（过去式）；有学问的","learning":"学习（进行时）","lesser":"较小的；次要的",
+	"lives":"生活（复数）；生命","lonely":"孤独的；寂寞的","made":"制作（make过去式）",
+	"managed":"管理（过去式）；设法完成","mattered":"重要；有关系（过去式）",
+	"may":"可能；可以","methods":"方法（复数）","might":"可能；或许",
+	"millions":"数百万","must":"必须；一定","needs":"需要（第三人称）",
+	"never":"从不；绝不","not":"不；没有","notebook":"笔记本",
+	"officials":"官员（复数）","once":"一次；曾经","ordinary":"普通的；平凡的",
+	"others":"其他人（复数）","out":"出去；在外","over":"在…上方；结束",
+	"own":"自己的；拥有","pages":"页（复数）","path":"路径；小路",
+	"person":"人；个人","point":"点；观点；指向","problems":"问题（复数）",
+	"proof":"证据；证明","proposals":"提案；建议（复数）","proves":"证明（第三人称）",
+	"questions":"问题（复数）","quietly":"安静地","recognition":"识别；认可",
+	"refused":"拒绝（过去式）","resources":"资源（复数）","said":"说（say过去式）",
+	"saw":"看见（see过去式）","scientist":"科学家","scientists":"科学家（复数）",
+	"secret":"秘密；秘密的","setback":"挫折；倒退","showed":"展示（show过去式）",
+	"sitting":"坐着（sit进行时）","slowly":"缓慢地","smiled":"微笑（过去式）",
+	"solved":"解决（过去式）","someday":"有一天；将来某个时候","something":"某事；某物",
+	"spring":"春天；弹簧；跳跃","started":"开始（过去式）","strongest":"最强壮的",
+	"summer":"夏天","taken":"拿；取（take过去分词）","taught":"教（teach过去式）",
+	"teaches":"教（teach第三人称）","testing":"测试（进行时）","there":"那里；有",
+	"too":"也；太","truly":"真正地；真诚地","trying":"尝试（进行时）",
+	"tuesday":"星期二","turned":"转动；转变（过去式）","turning":"转动（进行时）",
+	"types":"类型（复数）","understood":"理解（understand过去式）","was":"是（be过去式）",
+	"words":"词语（复数）","worked":"工作（过去式）；奏效","would":"将会；愿意",
+	"wrote":"写（write过去式）","years":"年（复数）","yellow":"黄色的","grandfather's":"祖父的；爷爷的"
 };
 // 导出全局
 if (typeof module !== 'undefined') module.exports = dictionary;
