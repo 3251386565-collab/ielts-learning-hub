@@ -2475,6 +2475,7 @@
             if (clean.endsWith('s') && !clean.endsWith('ss')) tries.push(clean.slice(0, -1));
             if (clean.endsWith('es')) tries.push(clean.slice(0, -2));
             if (clean.endsWith('ies')) tries.push(clean.slice(0, -3) + 'y');
+            if (clean.endsWith('ied')) tries.push(clean.slice(0, -3) + 'y');  // carried→carry
             if (clean.endsWith('ves')) tries.push(clean.slice(0, -3) + 'f');
             if (clean.endsWith('ing')) addStems(clean, 3, true);
             if (clean.endsWith('ed')) { addStems(clean, 2, false); tries.push(clean.slice(0, -1)); addStems(clean, 2, true); }
@@ -2514,11 +2515,13 @@
 
         async function translateWordENtoZH(word) {
             const clean = word.toLowerCase().replace(/[^a-z]/g, '');
-            if (!clean || clean.length < 2) return null;
+            if (!clean) return null;
 
-            // 1. 本地词典 + 词形还原
+            // 1. 本地词典 + 词形还原（即使是单字母也要查）
             const local = lookupWord(clean);
             if (local) return local;
+            // 单字母不再查API
+            if (clean.length < 2) return null;
 
             // 2. 缓存命中（正向或负向）
             const cache = getTranslationCache();
@@ -2587,7 +2590,7 @@
         }
 
         function formatTranslation(translation) {
-            if (!translation) return '未找到';
+            if (!translation) return null;
             // 用 | 分隔多个释义
             const parts = translation.split('|');
             if (parts.length === 1) return parts[0];
@@ -2637,10 +2640,40 @@
             tooltip.style.top = top + 'px';
             tooltip.classList.add('visible');
 
-            translateWordENtoZH(wordLower).then(translation => {
-                if (tooltipWord === wordLower) {
+            translateWordENtoZH(wordLower).then(function (translation) {
+                if (tooltipWord !== wordLower) return;
+                if (translation) {
                     tooltipTrans.innerHTML = formatTranslation(translation);
+                    return;
                 }
+                // 第一次失败，等 500ms 后重试一次
+                tooltipTrans.innerHTML = '重试中…';
+                setTimeout(function () {
+                    if (tooltipWord !== wordLower) return;
+                    translateWordENtoZH(wordLower).then(function (retry) {
+                        if (tooltipWord !== wordLower) return;
+                        if (retry) {
+                            tooltipTrans.innerHTML = formatTranslation(retry);
+                        } else {
+                            tooltipTrans.innerHTML = '翻译不可用';
+                        }
+                    }).catch(function () {
+                        if (tooltipWord === wordLower) tooltipTrans.innerHTML = '翻译不可用';
+                    });
+                }, 500);
+            }).catch(function () {
+                // Promise 异常 → 重试
+                if (tooltipWord !== wordLower) return;
+                tooltipTrans.innerHTML = '重试中…';
+                setTimeout(function () {
+                    if (tooltipWord !== wordLower) return;
+                    translateWordENtoZH(wordLower).then(function (retry) {
+                        if (tooltipWord !== wordLower) return;
+                        tooltipTrans.innerHTML = retry ? formatTranslation(retry) : '翻译不可用';
+                    }).catch(function () {
+                        if (tooltipWord === wordLower) tooltipTrans.innerHTML = '翻译不可用';
+                    });
+                }, 500);
             });
         }
 
