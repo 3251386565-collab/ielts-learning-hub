@@ -847,6 +847,24 @@ const dictionary = {
 	"lawn":"草地",
 	"woods":"树林",
 	"creek":"溪"
+,
+	"batteries":"电池",
+	"battery":"电池",
+	"breakfast":"早餐",
+	"decade":"十年",
+	"english":"英语",
+	"instead":"反而",
+	"isn":"不是（is not缩写）",
+	"ll":"将要（will缩写）",
+	"lot":"很多",
+	"often":"经常",
+	"panels":"面板",
+	"per":"每",
+	"please":"请",
+	"section":"部分",
+	"th":"第（序数词后缀）",
+	"ve":"已经（have缩写）",
+	"yes":"是的"
 };
 // 导出全局
 if (typeof module !== 'undefined') module.exports = dictionary;

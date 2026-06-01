@@ -2501,7 +2501,7 @@
         }
 
         // ========== 翻译缓存 ==========
-        const NEGATIVE_CACHE_TTL = 30 * 60 * 1000; // 失败的词 30 分钟内不再请求 API
+        const NEGATIVE_CACHE_TTL = 2 * 60 * 1000; // 失败的词 2 分钟后允许重试
         const FETCH_TIMEOUT_MS = 8000; // API 请求超时
 
         function getTranslationCache() {
@@ -2539,6 +2539,7 @@
 
             // 3. MyMemory API（带超时）
             let translated = null;
+            let mymemoryFailed = false;
             try {
                 const controller = new AbortController();
                 const timer = setTimeout(function () { controller.abort(); }, FETCH_TIMEOUT_MS);
@@ -2549,9 +2550,15 @@
                 clearTimeout(timer);
                 const data = await resp.json();
                 if (data.responseStatus === 200 && data.responseData && data.responseData.translatedText) {
-                    translated = data.responseData.translatedText;
+                    const t = data.responseData.translatedText;
+                    // 只有翻译结果和原文不同时才接受（避免 MyMemory 返回原词阻塞 Google）
+                    if (t.toLowerCase() !== clean.toLowerCase()) {
+                        translated = t;
+                    } else {
+                        mymemoryFailed = true; // MyMemory 无法翻译，继续尝试 Google
+                    }
                 }
-            } catch (e) { /* MyMemory 失败，继续尝试下一级 */ }
+            } catch (e) { mymemoryFailed = true; /* MyMemory 失败，继续尝试下一级 */ }
 
             // 4. Google Translate 兜底（免费，无需 API Key）
             if (!translated) {
@@ -2566,24 +2573,22 @@
                     const gdata = await gresp.json();
                     // Google 返回格式：[[["翻译","word",...], ...], null, "en"]
                     if (gdata && gdata[0] && gdata[0][0] && gdata[0][0][0]) {
-                        translated = gdata[0].map(function (item) { return item[0]; }).join(' | ');
+                        const t = gdata[0].map(function (item) { return item[0]; }).filter(Boolean).join(' | ');
+                        if (t && t.toLowerCase() !== clean.toLowerCase()) {
+                            translated = t;
+                        }
                     }
                 } catch (e2) { /* Google 也失败 */ }
             }
 
             // 5. 处理结果
             if (translated) {
-                if (translated.toLowerCase() === clean.toLowerCase()) {
-                    cache[clean] = '__NEG_' + Date.now();
-                    saveTranslationCache(cache);
-                    return null;
-                }
                 cache[clean] = translated;
                 saveTranslationCache(cache);
                 return translated;
             }
 
-            // 6. 两级 API 均失败 → 负缓存
+            // 6. 两级 API 均失败 → 短时间负缓存（2分钟，快速恢复）
             cache[clean] = '__NEG_' + Date.now();
             saveTranslationCache(cache);
             return null;
@@ -2613,6 +2618,8 @@
             }
 
             const wordLower = word.toLowerCase().replace(/[^a-z']/g, '');
+            // 缓存键（与 translateWordENtoZH 保持一致：去撇号、只保留 a-z）
+            const cacheKey = word.toLowerCase().replace(/[^a-z]/g, '');
             const tooltip = document.getElementById('wordTooltip');
             const tooltipOrig = document.getElementById('tooltipOriginal');
             const tooltipTrans = document.getElementById('tooltipTranslation');
@@ -2646,8 +2653,12 @@
                     tooltipTrans.innerHTML = formatTranslation(translation);
                     return;
                 }
-                // 第一次失败，等 500ms 后重试一次
+                // 第一次失败 → 清除负缓存后重试
                 tooltipTrans.innerHTML = '重试中…';
+                // 清除负缓存，确保重试能真正调用 API
+                var retryCache = getTranslationCache();
+                delete retryCache[cacheKey];
+                saveTranslationCache(retryCache);
                 setTimeout(function () {
                     if (tooltipWord !== wordLower) return;
                     translateWordENtoZH(wordLower).then(function (retry) {
@@ -2660,11 +2671,14 @@
                     }).catch(function () {
                         if (tooltipWord === wordLower) tooltipTrans.innerHTML = '翻译不可用';
                     });
-                }, 500);
+                }, 600);
             }).catch(function () {
-                // Promise 异常 → 重试
+                // Promise 异常 → 清除负缓存后重试
                 if (tooltipWord !== wordLower) return;
                 tooltipTrans.innerHTML = '重试中…';
+                var retryCache2 = getTranslationCache();
+                delete retryCache2[cacheKey];
+                saveTranslationCache(retryCache2);
                 setTimeout(function () {
                     if (tooltipWord !== wordLower) return;
                     translateWordENtoZH(wordLower).then(function (retry) {
@@ -2673,7 +2687,7 @@
                     }).catch(function () {
                         if (tooltipWord === wordLower) tooltipTrans.innerHTML = '翻译不可用';
                     });
-                }, 500);
+                }, 600);
             });
         }
 
