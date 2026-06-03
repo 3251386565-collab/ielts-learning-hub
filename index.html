@@ -3699,17 +3699,17 @@ The ** markers in English text will be used to highlight the target words. Make 
             return [...wordSet];
         }
 
-        // 自检翻译函数（调用 Google API 获取翻译）
+        // 自检翻译函数（本地词典 + Google API，不使用任何 API Key）
         async function selfCheckFetchTranslation(word) {
             var clean = word.toLowerCase().replace(/[^a-z]/g, '');
             if (!clean || clean.length < 2) return null;
-            // 先查本地
+            // 查本地词典（唯一依赖）
             var local = lookupWord(clean);
             if (local) return local;
-            // 调 Google API
+            // Google Translate 免费接口（无需 API Key）
             try {
                 var controller = new AbortController();
-                var timer = setTimeout(function () { controller.abort(); }, 8000);
+                var timer = setTimeout(function () { controller.abort(); }, 5000);
                 var resp = await fetch(
                     'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh&dt=t&q=' + encodeURIComponent(clean),
                     { signal: controller.signal }
