@@ -1177,9 +1177,123 @@
             color: var(--accent);
             box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
+
+        /* ========== 设置齿轮 & 面板 ========== */
+        .settings-gear {
+            position: fixed;
+            top: 1rem; right: 1rem;
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            border: 1.5px solid var(--border);
+            background: #fff;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 500;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+        .settings-gear:hover {
+            transform: rotate(60deg);
+            border-color: var(--accent);
+            box-shadow: var(--shadow-lg);
+        }
+        .settings-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            display: flex; align-items: center; justify-content: center;
+            animation: fadeIn 0.25s ease;
+        }
+        .settings-card {
+            background: #fff;
+            border-radius: 2rem;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            max-width: 420px; width: 90%;
+            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .settings-card h3 { font-size: 1.2rem; font-weight: 900; margin-bottom: 0.5rem; }
+        .settings-card .settings-desc {
+            font-size: 0.8rem; font-weight: 700; color: var(--text-muted);
+            margin-bottom: 1.2rem; line-height: 1.5;
+        }
+        .settings-card .settings-desc a {
+            color: var(--accent); text-decoration: underline;
+        }
+        .api-key-row {
+            display: flex; gap: 0.5rem; margin-bottom: 0.8rem;
+        }
+        .api-key-input {
+            flex: 1;
+            padding: 0.7rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 0.8rem;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.85rem; font-weight: 600;
+            outline: none; transition: border-color 0.2s;
+        }
+        .api-key-input:focus { border-color: var(--accent); }
+        .api-status {
+            font-size: 0.75rem; font-weight: 700;
+            padding: 0.3rem 0.8rem; border-radius: 999px;
+            margin-bottom: 0.8rem; display: inline-block;
+        }
+        .api-status.set { background: #e6fffa; color: #00a085; }
+        .api-status.unset { background: #fff5f5; color: #e74c3c; }
+        .settings-card .btn-row {
+            display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;
+        }
+        .btn-sm {
+            padding: 0.5rem 1.2rem;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.82rem; font-weight: 800;
+            border-radius: 999px; cursor: pointer;
+            transition: all 0.2s ease; border: none;
+        }
+        .btn-sm.primary { background: var(--accent); color: #fff; }
+        .btn-sm.primary:hover { transform: translateY(-1px); box-shadow: 0 4px 16px var(--accent-glow); }
+        .btn-sm.outline { background: #fff; color: var(--text-muted); border: 2px solid var(--border); }
+        .btn-sm.outline:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-sm.danger { background: #fff; color: #e74c3c; border: 2px solid #ffcccc; }
+        .btn-sm.danger:hover { background: #fff5f5; }
+
+        /* ========== 加载动画 ========== */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
+            gap: 1.5rem;
+        }
+        .loading-spinner {
+            width: 56px; height: 56px;
+            border: 5px solid #eeeef2;
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loading-text {
+            font-size: 0.95rem; font-weight: 800;
+            color: var(--text-muted);
+            text-align: center;
+        }
+        .loading-sub {
+            font-size: 0.78rem; font-weight: 600;
+            color: var(--accent-light);
+        }
     </style>
 </head>
 <body>
+
+    <!-- ==================== 设置齿轮 ==================== -->
+    <button class="settings-gear" id="settingsGear" onclick="showSettings()" title="设置 API Key">⚙️</button>
 
     <!-- ==================== 词译弹窗 ==================== -->
     <div class="word-tooltip" id="wordTooltip">
@@ -2941,15 +3055,39 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function goToChallenge() {
+        async function goToChallenge() {
             stopSpeaking();
             cameFromArticle = false;
             document.getElementById('btnBackArticle').classList.remove('visible');
             hideAllPages();
             document.getElementById('challengePage').style.display = 'flex';
             document.getElementById('challengePage').classList.add('active');
-            renderArticle();
+            // 先显示加载状态
+            document.getElementById('articleCard').innerHTML = `
+                <div class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text" id="loadingText">正在用 AI 生成你的专属故事…</div>
+                    <div class="loading-sub">故事将包含本次学习的全部 30 个词汇/短语</div>
+                </div>`;
             window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // 尝试 AI 生成，失败则降级模板
+            let storyData = null;
+            const apiKey = getApiKey();
+            if (apiKey) {
+                try {
+                    storyData = await generateWithDeepSeek(currentVocabulary, apiKey);
+                } catch (e) {
+                    console.log('[故事生成] DeepSeek 失败，降级模板:', e.message);
+                }
+            }
+            if (!storyData) {
+                document.getElementById('loadingText').textContent = '正在为你编织故事…';
+                await new Promise(r => setTimeout(r, 400)); // 短暂延迟让UI更新
+                storyData = generateWithTemplate(currentVocabulary);
+            }
+
+            renderStoryArticle(storyData);
         }
 
         function restart() {
@@ -2989,94 +3127,368 @@
             }
         }
 
-        // ========== 最终挑战文章（动态生成） ==========
-        function renderArticle() {
-            const allTerms = currentVocabulary.map(v => v.en);
-            document.getElementById('bankTags').innerHTML = allTerms.map(t =>
-                `<span class="bank-tag" onclick="onBankTagClick('${escapeHtml(t)}')">${escapeHtml(t)}</span>`
-            ).join('');
+        // ========== API Key 管理 ==========
+        function getApiKey() {
+            try { return localStorage.getItem('deepseek_api_key') || ''; }
+            catch (e) { return ''; }
+        }
+        function saveApiKey(key) {
+            try { localStorage.setItem('deepseek_api_key', key.trim()); }
+            catch (e) {}
+        }
+        function clearApiKey() {
+            try { localStorage.removeItem('deepseek_api_key'); }
+            catch (e) {}
+        }
+        function hasApiKey() { return !!getApiKey(); }
 
-            const pool = [...currentVocabulary];
-            const take = () => pool.length > 0 ? pool.splice(Math.floor(Math.random() * pool.length), 1)[0] : null;
-            const use = (w) => {
-                if (!w) return null;
-                return `<span class="word-highlight" data-term="${escapeHtml(w.en)}" onclick="event.stopPropagation();onHighlightClick('${escapeJsString(escapeHtml(w.en))}')">${escapeHtml(w.en)}</span>`;
+        // ========== 设置面板 ==========
+        function showSettings() {
+            const existing = document.getElementById('settingsOverlay');
+            if (existing) { existing.remove(); return; }
+            const currentKey = getApiKey();
+            const overlay = document.createElement('div');
+            overlay.className = 'settings-overlay';
+            overlay.id = 'settingsOverlay';
+            overlay.innerHTML = `
+                <div class="settings-card">
+                    <h3>⚙️ AI 故事生成设置</h3>
+                    <p class="settings-desc">
+                        使用 <a href="https://platform.deepseek.com" target="_blank">DeepSeek API</a> 为每次学习生成独一无二的英文故事。<br>
+                        获取 API Key：注册 → API Keys → 创建<br>
+                        <span style="font-size:0.7rem;color:var(--text-muted);">模型: deepseek-chat · 约 ¥0.001/篇</span>
+                    </p>
+                    <div class="api-key-row">
+                        <input class="api-key-input" id="apiKeyInput" type="password" placeholder="输入 DeepSeek API Key (sk-...)" value="${escapeHtml(currentKey)}" />
+                    </div>
+                    <div class="api-status ${currentKey ? 'set' : 'unset'}" id="apiStatus">
+                        ${currentKey ? '✅ API Key 已配置' : '⚠️ 未配置（将使用模板引擎）'}
+                    </div>
+                    <div class="btn-row">
+                        <button class="btn-sm primary" id="btnSaveKey">💾 保存</button>
+                        ${currentKey ? '<button class="btn-sm danger" id="btnClearKey">🗑 清除</button>' : ''}
+                        <button class="btn-sm outline" id="btnCloseSettings">关闭</button>
+                    </div>
+                </div>`;
+            document.body.appendChild(overlay);
+
+            overlay.querySelector('#btnSaveKey').onclick = () => {
+                const val = overlay.querySelector('#apiKeyInput').value.trim();
+                if (val) {
+                    saveApiKey(val);
+                    overlay.querySelector('#apiStatus').textContent = '✅ API Key 已配置';
+                    overlay.querySelector('#apiStatus').className = 'api-status set';
+                    alert('API Key 已保存！下次进入最终挑战时将使用 AI 生成故事。');
+                }
             };
+            const btnClear = overlay.querySelector('#btnClearKey');
+            if (btnClear) btnClear.onclick = () => {
+                clearApiKey();
+                overlay.querySelector('#apiKeyInput').value = '';
+                overlay.querySelector('#apiStatus').textContent = '⚠️ 未配置（将使用模板引擎）';
+                overlay.querySelector('#apiStatus').className = 'api-status unset';
+            };
+            overlay.querySelector('#btnCloseSettings').onclick = () => overlay.remove();
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+        }
 
-            // 段落模板：英文 + 对应中文翻译（[W] 占位符会被对应的词汇/短语替换）
-            // 一篇连贯的文章："祖父的笔记本"——每个[W]对应一个已学词汇/短语，总计30个
-            const paraTemplates = [
-                {
-                    en: `Last summer, I found an old notebook in my grandfather's attic. Its yellow pages held words that would [W] everything I knew about our family. The notebook described a secret project he had worked on for over forty years — something that could [W] millions of lives. I knew I had to [W] his story and find out what happened. I decided to [W] every clue he had left behind.`,
-                    cn: `去年夏天，我在祖父的阁楼里发现了一本旧笔记本。泛黄的书页里的文字将[W]我对家族的一切认知。笔记本描述了他默默进行了四十多年的一个秘密项目——一个能够[W]数百万人生活的东西。我必须[W]他的故事，查明真相。我决定[W]他留下的每一条线索。`
-                },
-                {
-                    en: `As I turned the pages, I learned he had been a plant scientist trying to grow food in dry lands. He believed that even the most [W] problems could be solved with enough effort. Today, there is a growing [W] that his approach was ahead of its time. My grandmother smiled. "Your grandfather," she said, "never let anyone [W] his dreams. He had a [W] belief that science belonged to everyone."`,
-                    cn: `翻阅书页，我了解到他曾是一位想在干旱土地上种植粮食的植物科学家。他相信即使最[W]的问题也能通过努力解决。如今，科学界越来越达成[W]，认为他的方法超前于时代。祖母微笑着说："你祖父从不允许任何人[W]他的梦想。他对科学属于每个人有着[W]的信念。"`
-                },
-                {
-                    en: `But the road was far from easy. Officials chose to [W] his proposals, calling them not [W] enough. They said the cost was too high. Yet he understood, [W] his limited resources, that this work mattered. He refused to [W] their judgment as final. Quietly, he kept going, believing the evidence would one day prove him right.`,
-                    cn: `但这路远非坦途。官员们选择[W]他的提案，称其不够[W]，成本太高。但他心里清楚，[W]自己有限的资源，这项工作值得坚持下去。他拒绝[W]他们的判断为最终裁决，默默前行，相信证据终有一天会证明他是对的。`
-                },
-                {
-                    en: `Then a flood destroyed most of his early test crops. The loss was [W] — years of work gone in one night. A lesser person might have turned to [W] easier goals. But not him. In the notebook he wrote: "Failure does not [W] us; it teaches us." He saw this setback not as a reason to stop, but as something that could [W] an even deeper understanding of the problem.`,
-                    cn: `接着一场洪水摧毁了他大部分早期试验作物。损失是[W]的——多年心血一夜化为乌有。换作别人，可能会转向[W]更简单的目标。但他没有。他在笔记本中写道："失败不会[W]我们；失败教会我们。"他把这次挫折不是看作放弃的理由，而是看作能够[W]对问题更深理解的机会。`
-                },
-                {
-                    en: `The turning point came on an ordinary Tuesday in spring. After testing hundreds of plant types, he found one that grew with almost no water. This was an [W] moment. He had managed to [W] what experts said was impossible. Slowly, other scientists began to [W] his methods. The work also started to [W] attention from international research groups.`,
-                    cn: `转折点出现在春天一个平凡的星期二。测试了数百种植物后，他终于找到一种几乎不需要水就能生长的品种。这是一个[W]的时刻。他成功[W]了专家们所说的不可能。慢慢地，其他科学家开始[W]他的方法。这项工作也开始[W]国际研究团体的关注。`
-                },
-                {
-                    en: `Today, his crops help feed communities across three countries. The technology has taken on a [W] of its own. What was once a lonely dream has become a [W] answer to hunger in dry lands. His work proves that science must always [W] human needs first. As one expert wrote, his contribution truly [W] the strongest recognition.`,
-                    cn: `如今，他的作物帮助三个国家的社区解决了粮食问题。这项技术已经形成了自己的[W]。曾经孤独的梦想已经成为干旱地区饥饿问题的[W]答案。他的工作证明，科学必须始终[W]人类需求。正如一位专家所写，他的贡献[W]最高的认可。`
-                },
-                {
-                    en: `Sitting in that dusty attic, I saw my own life differently. For years I had felt [W] about my path. But his story taught me never to [W] myself by what others say. One person with a strong idea can [W] the world. His life was proof that real change is always [W] when you are willing to work for it. No dream is out of reach.`,
-                    cn: `坐在布满灰尘的阁楼里，我重新审视自己的人生。多年来我对自己的道路感到[W]。但他的故事教会我永远不要用他人的评价来[W]自己。一个怀有坚定想法的人可以[W]世界。他的一生证明，只要你愿意为之努力，真正的改变永远是[W]的。没有什么梦想是遥不可及的。`
-                },
-                {
-                    en: `I closed the notebook and made a choice. I would go back to school and study plant science. His journey showed me that learning is about finding something that [W] you to do better for the world. A [W] curiosity, he once wrote, is the most powerful force on earth. May his words inspire my own children someday, just as they did for me in that quiet attic.`,
-                    cn: `我合上笔记本，做出了选择。我要重返校园学习植物科学。他的旅程告诉我，学习的意义在于找到能[W]你为世界做点什么的那件事。他曾写道，[W]的好奇心是地球上最强大的力量。愿他的话有朝一日也能激励我自己的孩子，就像在安静的阁楼里对我做的那样。`
-                },
-            ];
+        // ========== DeepSeek API 故事生成 ==========
+        async function generateWithDeepSeek(vocabulary, apiKey) {
+            const wordList = vocabulary.map((v, i) =>
+                `${i + 1}. "${v.en}" (${v.pos}: ${v.cn})`
+            ).join('\n');
 
-            const paras = [];
+            const systemPrompt = `You are a creative English story writer for ESL learners at IELTS Band 4-5 level.
 
-            for (const tpl of paraTemplates) {
+CRITICAL RULES:
+1. Write a complete, engaging English story of 400-600 words, divided into 8-10 paragraphs.
+2. You MUST use ALL of the following 30 words/phrases exactly once in the story. Mark each one with **word** so I can identify them.
+3. ALL other words in the story MUST be simple, common English words (CEFR A2-B1 level, like words a 12-year-old native speaker would know). Use short sentences where possible.
+4. The story should flow naturally — don't force words in awkwardly.
+5. After the English story, provide a Chinese translation for each paragraph.
+
+The 30 words/phrases to include:
+${wordList}
+
+Return ONLY valid JSON in this exact format (no markdown, no extra text):
+{
+  "title": "Story Title Here",
+  "paragraphs": [
+    {
+      "en": "English paragraph with **target words** marked like this.",
+      "cn": "Chinese translation of the paragraph."
+    },
+    ...
+  ]
+}
+
+The ** markers in English text will be used to highlight the target words. Make sure every one of the 30 words appears with ** around it exactly once.`;
+
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 35000);
+
+            try {
+                const resp = await fetch('https://api.deepseek.com/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + apiKey
+                    },
+                    body: JSON.stringify({
+                        model: 'deepseek-chat',
+                        messages: [
+                            { role: 'system', content: systemPrompt },
+                            { role: 'user', content: 'Generate a unique story using all 30 words. Make it different from any typical story. Return JSON only.' }
+                        ],
+                        temperature: 1.0,
+                        max_tokens: 4096
+                    }),
+                    signal: controller.signal
+                });
+                clearTimeout(timeout);
+
+                if (!resp.ok) {
+                    const errText = await resp.text();
+                    throw new Error('API error ' + resp.status + ': ' + errText.slice(0, 200));
+                }
+
+                const data = await resp.json();
+                const content = data.choices?.[0]?.message?.content;
+                if (!content) throw new Error('Empty API response');
+
+                // 解析 JSON（可能被包裹在代码块中）
+                let jsonStr = content.trim();
+                jsonStr = jsonStr.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?\s*```$/i, '');
+                const parsed = JSON.parse(jsonStr);
+
+                if (!parsed.title || !Array.isArray(parsed.paragraphs) || parsed.paragraphs.length === 0) {
+                    throw new Error('Invalid response structure');
+                }
+
+                // 处理英文段落中的 **word** 标记
+                parsed.paragraphs = parsed.paragraphs.map(p => ({
+                    en: p.en || '',
+                    cn: p.cn || ''
+                }));
+
+                return parsed;
+            } catch (e) {
+                clearTimeout(timeout);
+                throw e;
+            }
+        }
+
+        // ========== 模板故事引擎（Fallback：10套框架） ==========
+        const STORY_FRAMEWORKS = [
+            {   // 1. 侦探故事
+                title: "The Case of the Missing Painting",
+                paras: [
+                    { en: "On a quiet Monday morning, the Greenfield Art Museum made a [W] discovery — its most famous painting had vanished. The museum director tried to [W] the situation, but everyone could see how serious this was. Security footage had been [W], leaving no clues behind.", cn: "一个安静的周一早晨，格林菲尔德艺术博物馆有了一个[W]的发现——馆内最著名的画作消失了。馆长试图[W]局面，但人人都看得出这有多严重。监控录像被[W]了，没有留下任何线索。" },
+                    { en: "Detective Chen was called in to handle the case. She had built her career on solving crimes that others considered [W]. Her colleagues knew she would never [W] a challenge, no matter how difficult. She arrived at the museum with a [W] sense of determination.", cn: "陈侦探被请来处理此案。她的职业生涯建立在解决他人认为[W]的案件上。同事们知道她绝不会[W]任何挑战，无论多么困难。她带着[W]的决心来到博物馆。" },
+                    { en: "The first thing she noticed was that the glass case had not been broken. This was [W] the typical smash-and-grab methods. The thief, she realized, must have had inside help. Someone on staff had chosen to [W] the museum for personal gain.", cn: "她首先注意到玻璃柜没有被打破。这[W]典型的砸抢手法。她意识到窃贼一定有内部帮助。工作人员中有人选择[W]博物馆以谋取私利。" },
+                    { en: "Interviews with the staff [W] a troubling picture. The night guard had been acting strangely for weeks, [W] his long record of good service. He had been seen meeting with an unknown person outside the museum.", cn: "与工作人员的访谈[W]了一幅令人不安的画面。夜班保安[W]他长期的良好服务记录，已经行为古怪数周了。有人看到他在博物馆外与一个陌生人会面。" },
+                    { en: "The guard's financial records showed he had been [W] debt for months. This desperate situation could [W] anyone's judgment. Detective Chen believed that the guard did not act alone. A larger criminal network was [W] this operation.", cn: "保安的财务记录显示他[W]债务已有数月。这种绝望的处境会[W]任何人的判断力。陈侦探认为保安并非单独行动。一个更大的犯罪网络在[W]这次行动。" },
+                    { en: "With a search warrant, the police searched the guard's apartment. They found evidence that would [W] his role in the crime. More importantly, they discovered plans for future thefts. These documents helped [W] the full scope of the criminal network operating across three cities.", cn: "凭借搜查令，警方搜查了保安的公寓。他们发现了能[W]他在犯罪中角色的证据。更重要的是，他们发现了未来盗窃的计划。这些文件帮助[W]了跨三个城市运作的犯罪网络的完整规模。" },
+                    { en: "The arrest was made quietly to avoid public panic. The authorities knew that early media attention could [W] the investigation. The police chief praised Chen's work, noting that her approach [W] traditional detective methods in several important ways.", cn: "逮捕行动悄然进行以避免公众恐慌。当局知道过早的媒体关注会[W]调查。警察局长赞扬了陈的工作，指出她的方法在几个重要方面[W]了传统侦探手段。" },
+                    { en: "The painting was recovered from a storage unit near the port. For the art world, this was a [W] relief. The museum's reputation, which had been [W], was restored. Chen reflected that the case's success [W] teamwork more than individual brilliance.", cn: "画作在港口附近的一个储藏室中被找回。对艺术界来说，这是一个[W]的解脱。博物馆一度[W]的声誉得以恢复。陈反思，案件的成功[W]团队合作而非个人才华。" },
+                    { en: "Looking back, Detective Chen felt that the case had a [W] impact on how art theft should be investigated. It also showed that even [W] people can make terrible choices under pressure. No one is [W] the consequences of their actions.", cn: "回顾此案，陈侦探认为它对艺术盗窃的调查方式产生了[W]的影响。它也表明，即使是[W]的人在压力下也会做出可怕的选择。没有人能[W]自己行为的后果。" },
+                    { en: "The museum later published a report to [W] how security would change going forward. Chen's story [W] among young detectives, reminding them that careful observation [W] technological tools. As one colleague noted, her work truly [W] recognition.", cn: "博物馆后来发表了一份报告，以[W]未来安保如何改进。陈的故事[W]了年轻侦探，提醒他们仔细观察[W]技术工具。正如一位同事所说，她的工作确实[W]认可。" }
+                ]
+            },
+            {   // 2. 登山冒险
+                title: "The Last Summit",
+                paras: [
+                    { en: "Maria had always dreamed of climbing Mount Kirin. She had trained for three years, [W] every free moment to preparation. Many people told her this goal was [W] — the mountain had claimed lives before. But Maria was not someone who [W] easily.", cn: "玛丽亚一直梦想攀登麒麟峰。她训练了三年，[W]了每一个空闲时刻来准备。许多人告诉她这个目标是[W]的——这座山以前夺走过生命。但玛丽亚不是一个容易[W]的人。" },
+                    { en: "The expedition team included five climbers from different countries. They would need to [W] their resources carefully to survive the two-week journey. The team leader, an experienced guide named David, reminded everyone that safety must [W] speed.", cn: "探险队包括来自不同国家的五名登山者。他们需要仔细[W]资源才能在两周的旅程中生存下来。队长大卫是一位经验丰富的向导，他提醒大家安全必须[W]速度。" },
+                    { en: "The first days went well. The weather was mild, and the team made good progress [W] the challenging conditions. But on day five, a sudden storm arrived. The temperature dropped to levels that would [W] even the most experienced climbers.", cn: "头几天进展顺利。天气温和，团队[W]艰难的条件取得了良好进展。但第五天，一场突如其来的暴风雨来临。气温降至足以[W]最有经验的登山者的水平。" },
+                    { en: "Two team members wanted to turn back. They argued that continuing would be [W] with common sense. David listened carefully but explained that the storm would pass soon. His [W] judgment helped calm everyone down.", cn: "两名队员想返回。他们认为继续前进将[W]常识。大卫仔细倾听，但解释说暴风雨很快就会过去。他的[W]判断帮助大家冷静了下来。" },
+                    { en: "When the sky cleared, they saw the most [W] view Maria had ever experienced. The sunrise painted the snow in shades of gold and pink. She realized that this moment alone [W] all the hardship they had endured.", cn: "天晴后，他们看到了玛丽亚所经历过的最[W]的景色。日出将雪染成了金色和粉色的色调。她意识到，仅这一刻就[W]了他们所承受的所有艰辛。" },
+                    { en: "The final climb was the hardest. The ice was thin in places, and one wrong step could be [W]. Maria's legs were shaking, but she refused to [W] the goal she had chased for so long. Step by step, she kept moving upward.", cn: "最后的攀登是最艰难的。有些地方的冰很薄，一步走错就可能[W]。玛丽亚的腿在颤抖，但她拒绝[W]自己追逐了这么久的目标。一步一步，她继续向上移动。" },
+                    { en: "At the summit, the team stood in silence. The world below seemed so small from this height. Maria felt a [W] sense of achievement that words could not describe. It was, she thought, a truly [W] moment in her life.", cn: "在峰顶，团队静静地站着。从这样的高度看，下面的世界显得如此渺小。玛丽亚感受到一种难以言表的[W]的成就感。她想，这是她生命中一个真正[W]的时刻。" },
+                    { en: "The descent was careful but joyful. The team knew they had achieved something that [W] ordinary accomplishments. Their success would [W] future expeditions to this remote peak.", cn: "下山过程小心而愉快。团队知道他们达成了[W]普通成就的事情。他们的成功将[W]未来在这座偏远山峰的探险。" },
+                    { en: "Back home, Maria shared her experience with schoolchildren. She wanted them to understand that great achievements require [W] effort and preparation. The natural world, she explained, teaches us to be both [W] and careful.", cn: "回到家后，玛丽亚与学童们分享了她的经历。她想让他们明白，伟大的成就需要[W]的努力和准备。她解释说，自然界教会我们既要[W]，又要小心。" },
+                    { en: "A documentary was made about the expedition. It helped [W] the public's understanding of mountain safety. Looking at the film, Maria smiled, knowing that her journey had the power to [W] others to pursue their own summits.", cn: "关于这次探险的纪录片被制作出来。它帮助[W]了公众对山地安全的理解。看着影片，玛丽亚微笑，知道她的旅程有力量[W]其他人去追寻自己的顶峰。" }
+                ]
+            },
+            {   // 3. 年轻发明家
+                title: "The Boy Who Lit Up His Village",
+                paras: [
+                    { en: "In a small village without electricity, a fifteen-year-old boy named Arjun had an idea. He had read about solar power and believed it could [W] his community's energy problem. His friends thought he was too young to make a difference, but Arjun knew that age should not [W] your ability to help others.", cn: "在一个没有电力的小村庄里，一个名叫阿尔琼的十五岁男孩有了一个主意。他读过关于太阳能的资料，相信它可以[W]他社区的能源问题。朋友们认为他太年轻，无法做出改变，但阿尔琼知道年龄不应该[W]你帮助他人的能力。" },
+                    { en: "He started collecting old solar panels from a nearby city dump. [W] his limited knowledge, he taught himself electronics through borrowed books. The work was difficult, but Arjun had an [W] curiosity that kept him going.", cn: "他开始从附近的城市垃圾场收集旧太阳能板。[W]自己有限的知识，他通过借来的书籍自学电子学。工作很困难，但阿尔琼有着[W]的好奇心，驱使他继续前进。" },
+                    { en: "After months of experimenting, he built a small device that could power one light bulb. Many villagers came to see it. They began to [W] that even a young person could achieve something meaningful. The village elder, who was usually [W], admitted he was impressed.", cn: "经过数月的实验，他制造了一个能点亮一个灯泡的小装置。许多村民前来观看。他们开始[W]即使是年轻人也能实现有意义的事情。平时[W]的村长老承认他被打动了。" },
+                    { en: "News of Arjun's invention spread to nearby towns. A local newspaper wrote an article trying to [W] how a boy with so few resources could create something useful. The story [W] a debate about education in rural areas.", cn: "阿尔琼发明的消息传到了附近的城镇。一家当地报纸写了一篇文章，试图[W]一个资源如此有限的男孩如何创造出有用的东西。这个故事[W]了一场关于农村教育的讨论。" },
+                    { en: "An engineer from the city visited the village. He said Arjun's design was [W] — simple, cheap, and effective. He offered to help the boy [W] the project further. Together, they designed a system that could power the entire village school.", cn: "一位来自城市的工程师访问了村庄。他说阿尔琼的设计是[W]的——简单、廉价且有效。他提出帮助男孩进一步[W]这个项目。他们一起设计了一个可以为整个村校供电的系统。" },
+                    { en: "The government heard about the project and decided to support it. Officials promised to [W] funds for expanding the solar program to ten more villages. This support would [W] thousands of families who still lived without electricity.", cn: "政府听说了这个项目并决定支持它。官员承诺[W]资金将太阳能项目扩展到另外十个村庄。这种支持将[W]成千上万仍然生活在没有电力中的家庭。" },
+                    { en: "Arjun's achievement showed that innovation does not [W] expensive equipment or formal education. What matters most is the willingness to try. His story [W] young people across the country to believe in their own ideas.", cn: "阿尔琼的成就表明，创新并不[W]昂贵的设备或正规教育。最重要的是尝试的意愿。他的故事[W]了全国各地的年轻人相信自己的想法。" },
+                    { en: "Years later, Arjun became an engineer. He continued working on renewable energy projects, never forgetting his village roots. People said his success was the [W] result of hard work and a dream that refused to die.", cn: "多年后，阿尔琼成为了一名工程师。他继续从事可再生能源项目，从未忘记自己的乡村根源。人们说他的成功是努力和不灭梦想的[W]结果。" },
+                    { en: "The village school now has a plaque with his name. It tells students that one small idea, when pursued with dedication, can [W] into something much larger. The light that Arjun brought continues to shine brightly, [W] the darkness of doubt and fear.", cn: "村校现在有一块刻着他名字的牌匾。它告诉学生，一个小小的想法，当以奉献精神追求时，可以[W]成更大的东西。阿尔琼带来的光芒继续明亮地照耀着，[W]了怀疑和恐惧的黑暗。" }
+                ]
+            },
+            {   // 4. 海洋科学家
+                title: "Voices from the Deep",
+                paras: [
+                    { en: "Dr. Elena Santos was a marine biologist who studied whale communication. Her research aimed to [W] how these magnificent creatures share information across vast ocean distances. She believed that their songs could [W] secrets about the health of our planet.", cn: "埃琳娜·桑托斯博士是一位研究鲸鱼交流的海洋生物学家。她的研究旨在[W]这些壮丽的生物如何在广阔的海洋距离上分享信息。她相信它们的歌声可以[W]关于地球健康的秘密。" },
+                    { en: "For fifteen years, she had collected recordings from oceans around the world. The data, [W] from any other study of its kind, showed something alarming. Whale songs were becoming quieter. This change, she feared, might [W] a much larger environmental crisis.", cn: "十五年来，她收集了来自世界各地海洋的录音。这些数据[W]同类研究，显示出令人担忧的情况。鲸鱼的歌声正变得越来越安静。她担心这种变化可能[W]一场更大的环境危机。" },
+                    { en: "The main problem was noise pollution from ships. The constant engine sounds were making it hard for whales to hear each other. Elena knew she had to [W] this issue before it was too late. The whales' ability to find mates and food was being [W] by human activity.", cn: "主要问题是船只的噪音污染。持续的引擎声使鲸鱼难以听到彼此。埃琳娜知道她必须在为时已晚之前[W]这个问题。鲸鱼寻找配偶和食物的能力正被人类活动[W]。" },
+                    { en: "She presented her findings at an international conference. Many scientists found the evidence [W]. However, shipping companies were less willing to listen. They argued that changing their routes would be too expensive, [W] their commercial interests.", cn: "她在国际会议上展示了她的研究结果。许多科学家认为这些证据[W]。然而，航运公司不太愿意听。他们辩称改变航线将过于昂贵，[W]他们的商业利益。" },
+                    { en: "Elena refused to give up. She launched a public campaign that [W] the support of millions of people worldwide. The campaign used social media to [W] the voices of concerned citizens. Politicians began to take notice.", cn: "埃琳娜拒绝放弃。她发起了一场公开运动，[W]了全球数百万人的支持。这场运动利用社交媒体[W]了关心此事的公民的声音。政治家们开始注意到。" },
+                    { en: "The turning point came when a famous musician joined the cause. His involvement helped [W] the issue in a way that scientific papers alone could not. Together, they produced a documentary that [W] the beauty of whale songs for everyone to hear.", cn: "转折点出现在一位著名音乐家加入这项事业时。他的参与[W]了单靠科学论文无法做到的方式诠释了这一问题。他们一起制作了一部纪录片，[W]了鲸鱼歌声的美丽，让所有人都能听到。" },
+                    { en: "New international rules were finally introduced. Ships were required to reduce speed in whale habitats. The decision was [W] evidence that collective action can create real change. Elena knew this was just the beginning, but it was a [W] victory.", cn: "新的国际规则最终被引入。船只被要求在鲸鱼栖息地降低速度。这个决定[W]集体行动可以创造真正改变的证据。埃琳娜知道这只是开始，但这是一场[W]的胜利。" },
+                    { en: "Today, whale populations in protected areas are slowly recovering. Elena continues her research, now focused on how climate change might [W] the progress that has been made. Every recording she makes [W] a crucial piece of knowledge for future generations.", cn: "如今，受保护区域的鲸鱼数量正在缓慢恢复。埃琳娜继续她的研究，现在专注于气候变化可能如何[W]已取得的进展。她做的每一次录音都为后代[W]了至关重要的知识。" },
+                    { en: "She often says that the whales taught her something important: that no creature is [W] the fate of the planet. We are all connected, from the smallest fish to the largest whale. Her work remains an [W] example of how science can serve nature.", cn: "她常说鲸鱼教会了她重要的事：没有任何生物[W]地球的命运。我们都是相连的，从最小的鱼到最大的鲸鱼。她的工作仍然是科学如何服务自然的一个[W]的典范。" }
+                ]
+            },
+            {   // 5. 小镇面包店
+                title: "The Bread That Brought Us Together",
+                paras: [
+                    { en: "Old Mr. Kowalski had run the town bakery for fifty years. His bread was famous, but the shop itself had become old and worn. Some people suggested he should [W] the old ways and modernize. But Mr. Kowalski believed his methods had [W] the test of time.", cn: "老科瓦尔斯基先生经营镇上的面包店已经五十年了。他的面包很出名，但店铺本身已变得陈旧破损。有人建议他应该[W]旧的方式并现代化。但科瓦尔斯基先生相信他的方法已经[W]了时间的考验。" },
+                    { en: "His granddaughter Lena came to visit one summer. She was studying business at university and thought she could help. At first, Mr. Kowalski was [W] — he believed young people knew nothing about real work. But Lena was determined to prove him wrong.", cn: "他的孙女莉娜一个夏天来看望他。她在大学学习商科，认为她可以帮助。起初，科瓦尔斯基先生[W]——他认为年轻人对真正的工作一无所知。但莉娜决心证明他是错的。" },
+                    { en: "Lena started by listening to customers. She discovered that many of them wanted to learn how to bake bread themselves. This gave her an idea that could [W] a new direction for the business. She proposed starting weekend baking classes at the shop.", cn: "莉娜从倾听顾客开始。她发现许多顾客想自己学习烤面包。这给了她一个可以[W]业务新方向的想法。她提议在店里开设周末烘焙课。" },
+                    { en: "Mr. Kowalski was hesitant at first. He worried that teaching others would [W] the special quality that made his bread unique. But Lena argued that sharing knowledge would not [W] his reputation — it would enhance it.", cn: "科瓦尔斯基先生起初很犹豫。他担心教别人会[W]他的面包独特的特殊品质。但莉娜辩称，分享知识不会[W]他的声誉——反而会提升它。" },
+                    { en: "The classes became incredibly popular. People came from neighboring towns to learn from the old baker. The shop's income doubled, [W] everyone's expectations. Lena's idea had proven to be [W] — the bakery was now busier than ever before.", cn: "课程变得非常受欢迎。人们从邻近城镇赶来向老面包师学习。店铺的收入翻了一倍，[W]了所有人的预期。莉娜的想法被证明是[W]的——面包店现在比以往任何时候都更忙。" },
+                    { en: "But the real magic was what happened inside the bakery. Strangers who met in class became friends. Elderly people who had felt lonely found new purpose. The bakery had transformed into a place that could [W] gaps between generations and cultures.", cn: "但真正的魔力发生在面包店内。在课堂上相遇的陌生人成为了朋友。感到孤独的老年人找到了新的目标。面包店变成了一个能[W]代际和文化鸿沟的地方。" },
+                    { en: "A local newspaper wrote: 'Mr. Kowalski's bread feeds the stomach, but his bakery feeds the soul.' The article [W] the baker's philosophy — that food is never just about food. He had [W] shown that traditional skills still have great value in a modern world.", cn: "一家当地报纸写道：'科瓦尔斯基先生的面包滋养胃，但他的面包店滋养灵魂。'这篇文章[W]了面包师的哲学——食物从来不仅仅是食物。他[W]证明了传统技能在现代世界中仍然具有巨大价值。" },
+                    { en: "Lena eventually took over the business, but she kept everything her grandfather had taught her close to heart. She knew that [W] his wisdom would be a mistake. The bakery still stands today, a small place that continues to [W] joy through simple bread.", cn: "莉娜最终接管了生意，但她将爷爷教给她的一切牢记在心。她知道[W]他的智慧将是一个错误。面包店至今仍然屹立，这个小地方继续通过简单的面包[W]快乐。" }
+                ]
+            },
+            {   // 6. 天文发现
+                title: "A Star in the Dark",
+                paras: [
+                    { en: "Amir was twelve when he looked through a telescope for the first time. That moment [W] a lifelong passion for astronomy. He saved money for two years to buy his own telescope, [W] every unnecessary expense. His parents worried that this hobby might [W] his schoolwork.", cn: "阿米尔十二岁时第一次透过望远镜观看。那一刻[W]了他对天文学终生的热情。他存了两年钱买自己的望远镜，[W]了所有不必要的开支。他的父母担心这个爱好会[W]他的学业。" },
+                    { en: "But the opposite happened. Amir's grades improved because he started reading about physics and mathematics. His science teacher noticed the change and decided to [W] his talent. She gave him advanced books and introduced him to a local astronomy club.", cn: "但结果恰恰相反。阿米尔的成绩提高了，因为他开始阅读物理和数学。他的科学老师注意到了变化并决定[W]他的才能。她给了他高级书籍，并把他介绍给当地的天文学俱乐部。" },
+                    { en: "One night, while observing a familiar part of the sky, Amir noticed something unusual. A tiny point of light was moving in a way that [W] known patterns of stars and planets. His heart raced. Could this be something new?", cn: "一天晚上，在观察天空的熟悉部分时，阿米尔注意到了一些不寻常的东西。一个微小的光点在以[W]已知恒星和行星模式的方式移动。他的心跳加速了。这可能是新的东西吗？" },
+                    { en: "He recorded his observations carefully and sent the data to a national observatory. The experts were initially [W] — after all, he was just a boy. But when they checked his data against their own records, their attitude [W] completely.", cn: "他仔细记录了他的观察并将数据发送给国家天文台。专家们起初[W]——毕竟他只是个孩子。但当他们将他的数据与自己的记录对照时，他们的态度完全[W]了。" },
+                    { en: "Amir had discovered a new asteroid. The astronomical community was amazed. A panel of senior scientists wrote that his finding could [W] a better understanding of our solar system. His name appeared in scientific journals, [W] recognition for his remarkable achievement.", cn: "阿米尔发现了一颗新的小行星。天文学界感到惊讶。一个资深科学家小组写道，他的发现可以[W]对我们太阳系更好的理解。他的名字出现在科学期刊上，[W]对他非凡成就的认可。" },
+                    { en: "The discovery changed Amir's life. He received a scholarship to study at a leading science institute. The award would help [W] all the costs of his education. His family, who had once worried about his hobby, now felt [W] pride.", cn: "这个发现改变了阿米尔的生活。他获得了在一所顶尖科学学院学习的奖学金。这笔奖金将帮助[W]他所有教育费用。他的家人曾经担心他的爱好，现在感到[W]的自豪。" },
+                    { en: "Amir later said that the most important lesson was not about finding an asteroid. What mattered was that he had followed his curiosity [W] what others expected. His story [W] young people everywhere to look up at the night sky with wonder.", cn: "阿米尔后来说，最重要的教训不是关于发现小行星。重要的是他跟随自己的好奇心，[W]他人的期望。他的故事[W]了各地的年轻人怀着惊奇仰望夜空。" },
+                    { en: "Today, Amir works at the same observatory that once checked his childhood discovery. He mentors young astronomers, believing that talent can [W] in the most unexpected places. The asteroid he found will carry his name forever — a [W] reminder that passion can move the universe.", cn: "今天，阿米尔在他童年发现被验证的同一个天文台工作。他指导年轻的天文学家，相信才能可以[W]在最意想不到的地方。他发现的小行星将永远以他的名字命名——一个[W]的提醒，热情可以撼动宇宙。" }
+                ]
+            },
+            {   // 7. 社区花园
+                title: "The Garden on Maple Street",
+                paras: [
+                    { en: "Maple Street was not a beautiful place. The empty lot in the middle of the neighborhood had become a dumping ground. People said that trying to clean it would be [W], given how bad things had become. But a retired teacher named Mrs. Park saw things differently.", cn: "枫树街不是一个美丽的地方。社区中间的空地变成了垃圾场。人们说试图清理它将是[W]的，鉴于情况变得如此糟糕。但一位名叫帕克夫人的退休教师有不同的看法。" },
+                    { en: "She called a neighborhood meeting. Only five people came. But Mrs. Park was not discouraged. She knew that big changes often [W] small beginnings. 'We cannot wait for someone else to fix our home,' she said. 'We must [W] for ourselves what kind of neighborhood we want.'", cn: "她召集了一次社区会议。只有五个人来了。但帕克夫人并没有气馁。她知道大的变化往往[W]小的开始。'我们不能等别人来修好我们的家，'她说。'我们必须为自己[W]我们想要什么样的社区。'" },
+                    { en: "The first weekend was hard. The work seemed endless, and some volunteers wanted to quit. But Mrs. Park reminded them that patience and persistence [W] quick results. She had a way of encouraging people that could [W] even the most tired worker.", cn: "第一个周末很艰难。工作似乎无穷无尽，一些志愿者想退出。但帕克夫人提醒他们，耐心和坚持[W]快速的结果。她有一种鼓励人的方式，可以[W]即使是最疲惫的工人。" },
+                    { en: "Slowly, the lot transformed. Flowers replaced garbage. Benches were built from old wood. Neighbors who had never spoken before began working side by side. The garden became living proof that community spirit could [W] years of neglect.", cn: "慢慢地，空地改变了面貌。鲜花取代了垃圾。旧木头建成了长椅。以前从未交谈过的邻居开始并肩工作。花园成为了社区精神可以[W]多年忽视的活生生的证明。" },
+                    { en: "The garden's success [W] the attention of the city government. Officials visited and decided to support similar projects in other neighborhoods. The mayor praised Mrs. Park for her vision, saying her work represented a [W] change in how the city thought about community spaces.", cn: "花园的成功[W]了市政府的关注。官员们访问并决定支持其他社区的类似项目。市长赞扬了帕克夫人的远见，称她的工作代表了城市对社区空间思考方式的[W]改变。" },
+                    { en: "Local schools started bringing students to learn about plants. The garden became an outdoor classroom. Teachers found that children who struggled indoors could [W] in this natural setting. One student said the garden helped her understand that learning can [W] joy, not just grades.", cn: "当地学校开始带学生来学习植物。花园变成了户外教室。老师们发现，在室内困难的孩子们能在这种自然环境中[W]。一个学生说，花园帮助她理解学习可以[W]快乐，而不仅仅是分数。" },
+                    { en: "Ten years later, the garden is still there. New families have moved to Maple Street, attracted by the green space. What was once an ugly lot now produces food, flowers, and friendships. Mrs. Park, now in her eighties, still visits every day, [W] her belief that one person with a vision can change everything.", cn: "十年后，花园仍然在那里。新家庭搬到了枫树街，被绿地吸引。曾经丑陋的空地现在生产食物、鲜花和友谊。帕克夫人现已八十多岁，仍然每天来访，[W]她的信念——一个有远见的人可以改变一切。" }
+                ]
+            },
+            {   // 8. 音乐比赛
+                title: "The Sound of Courage",
+                paras: [
+                    { en: "Yuki had been playing the piano since she was four. Now sixteen, she was preparing for the biggest competition of her life. The pressure was [W] — everyone expected her to win. But Yuki knew that [W] too much on winning could destroy the joy of music.", cn: "由纪从四岁起就开始弹钢琴。现在十六岁，她正在为人生中最大的比赛做准备。压力是[W]的——每个人都期望她赢。但由纪知道，过于[W]胜利会摧毁音乐的乐趣。" },
+                    { en: "Her teacher, a strict woman named Madame Chen, pushed her hard. She believed that Yuki could achieve something truly [W] if she worked hard enough. 'Your talent must [W] every note you play,' she would say. But Yuki sometimes felt like she was losing herself.", cn: "她的老师是一位严格的陈夫人，对她要求很高。她相信如果由纪足够努力，她可以取得真正[W]的成就。'你的才能必须[W]你弹奏的每一个音符，'她会说。但由纪有时觉得自己正在迷失自我。" },
+                    { en: "Two weeks before the competition, Yuki hit a wall. She could not play a particularly difficult piece no matter how hard she tried. She began to [W] her own ability. What if she was not as talented as everyone believed?", cn: "比赛前两周，由纪遇到了瓶颈。无论多么努力，她都弹不了一首特别难的曲子。她开始[W]自己的能力。如果她没有大家认为的那么有才华怎么办？" },
+                    { en: "Madame Chen noticed her struggle. 'You are playing like someone who is afraid of making mistakes,' she said. 'But music does not come from fear. It comes from the courage to [W] your true feelings through the keys.' This advice was a turning point.", cn: "陈夫人注意到了她的挣扎。'你弹得像一个害怕犯错的人，'她说。'但音乐不是来自恐惧。它来自[W]你真实情感通过琴键表达的勇气。'这个建议是一个转折点。" },
+                    { en: "On the day of the competition, Yuki felt surprisingly calm. She decided to focus not on the judges or the audience but on what the music meant to her. When her fingers touched the keys, something magical happened — she played not to [W] others, but to express herself.", cn: "比赛当天，由纪出奇地平静。她决定不关注评委或观众，而是关注音乐对她意味着什么。当她的手指触及琴键时，神奇的事情发生了——她弹奏不是为了[W]别人，而是为了表达自己。" },
+                    { en: "She won first prize, but the victory itself was not what mattered most. What mattered was understanding that true art cannot be measured by competitions alone. Her performance [W] between technical perfection and emotional depth in a way that moved everyone present.", cn: "她获得了第一名，但胜利本身并不是最重要的。重要的是她明白了真正的艺术不能仅凭比赛来衡量。她的演奏在技术完美和情感深度之间[W]，感动了在场的每一个人。" },
+                    { en: "After the competition, Yuki decided to teach music to young children from poor families. She believed that talent should not be [W] those who can afford lessons. Her work helped [W] the idea that music education is a right, not a privilege.", cn: "比赛结束后，由纪决定教贫困家庭的幼儿音乐。她相信才能不应该[W]那些能负担得起课程的人。她的工作帮助[W]了音乐教育是一种权利而非特权的理念。" },
+                    { en: "Looking back on her journey, Yuki realized that the competition had taught her something [W]: that courage is not the absence of fear, but the ability to move forward despite it. Music, she now understood, can [W] the deepest truths of the human heart.", cn: "回顾她的旅程，由纪意识到比赛教会了她[W]的东西：勇气不是没有恐惧，而是尽管恐惧仍然前行的能力。她现在明白，音乐可以[W]人类心灵最深处的真相。" }
+                ]
+            },
+            {   // 9. 旧书店
+                title: "The Bookshop at the End of the Lane",
+                paras: [
+                    { en: "Tucked away on a narrow street, there was a bookshop that everyone passed but few entered. It was run by a quiet woman named Iris, who seemed as old as the books she sold. The shop was dusty and [W] — but those who stepped inside discovered something magical.", cn: "藏在一条狭窄街道上，有一家每个人经过但很少人进入的书店。店主是一位安静的女士艾瑞丝，她似乎和她卖的书一样古老。书店布满灰尘且[W]——但那些走进来的人发现了某种神奇的东西。" },
+                    { en: "Leo was a university student who stumbled into the shop while escaping the rain. He was not someone who usually read for pleasure — he found most books [W] compared to the fast pace of modern life. Iris smiled knowingly. 'Every book has its reader,' she said softly.", cn: "利奥是个大学生，在躲雨时偶然走进了这家店。他不是那种通常为乐趣而读书的人——他发现大多数书籍[W]于现代生活的快节奏。艾瑞丝会意地微笑。'每本书都有它的读者，'她轻声说。" },
+                    { en: "She handed him a small, worn book with no title on the cover. Leo opened it reluctantly, expecting to be bored. But the story inside was unlike anything he had ever read — it seemed to [W] the boundaries between fiction and reality. He was hooked.", cn: "她递给他一本没有书名的小旧书。利奥不情愿地打开它，预计会感到无聊。但里面的故事与他读过的一切都不同——它似乎[W]了虚构与现实之间的界限。他被吸引住了。" },
+                    { en: "Leo returned every week after that. Iris introduced him to books that [W] his thinking in unexpected ways. Through literature, he began to understand experiences that were completely [W] his own life. Reading became not just a hobby, but a way to grow.", cn: "从那以后利奥每周都回来。艾瑞丝向他介绍了以意想不到的方式[W]他思维的书。通过文学，他开始理解与他自己生活完全[W]的经历。阅读不仅成为了爱好，更成为了成长的方式。" },
+                    { en: "One day, Leo learned that the bookshop was going to close. The owner of the building had decided to sell. The news [W] harshly — this place had become his second home. He felt he had to do something to [W] this cultural treasure.", cn: "一天，利奥得知书店要关门了。楼房的主人决定出售。这个消息来得很[W]——这个地方已经成了他的第二个家。他觉得自己必须做些什么来[W]这个文化宝藏。" },
+                    { en: "He organized a fundraising campaign with other customers. They shared stories of how Iris and her books had touched their lives. The campaign quickly [W] support from across the city. Writers and artists came forward to help.", cn: "他和其他顾客组织了一场筹款活动。他们分享了艾瑞丝和她的书如何触动他们生活的故事。这场活动迅速[W]了来自城市各地的支持。作家和艺术家们站出来提供帮助。" },
+                    { en: "They saved the bookshop. But more importantly, the campaign [W] a conversation about the importance of quiet spaces in a noisy world. The shop became more than a business — it became a symbol of how human connection can [W] commercial logic.", cn: "他们挽救了书店。但更重要的是，这场活动[W]了一场关于嘈杂世界中安静空间重要性的对话。这家店超越了商业——它成为了人与人之间的联系如何可以[W]商业逻辑的象征。" },
+                    { en: "Leo still visits every week. He now helps Iris run the shop, learning the quiet art of matching readers with books. He often tells new visitors that this place taught him something [W]: that stories have the power to change who we are.", cn: "利奥仍然每周来访。他现在帮艾瑞丝打理店铺，学习将读者与书籍匹配的安静艺术。他常告诉新访客，这个地方教会了他[W]的东西：故事有改变我们是谁的力量。" }
+                ]
+            },
+            {   // 10. 河流净化项目
+                title: "The River Returns",
+                paras: [
+                    { en: "For decades, the Willow River was too polluted to support life. Factories had dumped waste into it for years, and the water had turned a sickly brown. Most people accepted this as a [W] reality — industry had always come first. But a young scientist named Dr. Rivera believed change was possible.", cn: "几十年来，柳树河污染严重，无法维持生命。工厂多年来向其中倾倒废物，河水变成了病态的棕色。大多数人把这当作[W]的现实——工业始终是第一位的。但一位名叫里维拉博士的年轻科学家相信改变是可能的。" },
+                    { en: "She assembled a small team and secured funding for a pilot cleanup project. The budget was [W], but Dr. Rivera believed that determination mattered more than money. She was determined to prove that environmental protection and economic growth do not have to be [W] each other.", cn: "她组建了一个小团队并为一个试点清理项目获得了资金。预算是[W]的，但里维拉博士相信决心比金钱更重要。她决心证明环境保护与经济增长不必[W]对方。" },
+                    { en: "The team began by planting special grasses along the riverbank. These plants could naturally filter pollutants from the water. It was a method that [W] traditional chemical treatments. The approach was slower but more sustainable.", cn: "团队首先沿河岸种植了特殊的草。这些植物可以自然地过滤水中的污染物。这种方法[W]传统的化学处理。这个方法更慢但更可持续。" },
+                    { en: "The first year showed modest improvements. Some people said the results did not [W] the investment of time and money. But Dr. Rivera explained that real change takes time. She asked for patience, knowing that the data would eventually [W] her approach.", cn: "第一年显示出适度的改善。有人说结果不[W]时间和金钱的投入。但里维拉博士解释说真正的改变需要时间。她请求耐心，知道数据最终会[W]她的方法。" },
+                    { en: "By the third year, the water quality had improved dramatically. Fish returned to the river for the first time in thirty years. The ecosystem began to recover in ways that [W] all scientific predictions. Other cities sent representatives to study the project.", cn: "到第三年，水质显著改善。鱼三十年来首次回到河中。生态系统开始以[W]所有科学预测的方式恢复。其他城市派代表来研究这个项目。" },
+                    { en: "The factories that had once caused the pollution began to change their practices. They realized that clean operations could actually [W] costs in the long run. The river project had [W] a new era of cooperation between industry and environmental groups.", cn: "曾经造成污染的工厂开始改变他们的做法。他们意识到清洁运营从长远来看实际上可以[W]成本。河流项目[W]了工业与环保团体合作的新时代。" },
+                    { en: "Today, the Willow River is a public park where families come to walk and children play. Dr. Rivera's work is taught in schools as an example of how science can solve real problems. Her story shows that environmental damage is not [W] — it can be reversed with effort and patience.", cn: "今天，柳树河是一个公园，家人来散步，孩子们玩耍。里维拉博士的工作作为科学如何解决真实问题的范例在学校教授。她的故事表明环境破坏并非[W]——通过努力和耐心可以逆转。" },
+                    { en: "Dr. Rivera often walks along the river she helped save. She thinks about what it teaches us: that nature is not something we can [W] endlessly. It needs our respect. The river's return is a [W] message of hope for communities everywhere facing environmental challenges.", cn: "里维拉博士常常沿着她帮助挽救的河流散步。她思考它教给我们的道理：自然不是我们可以无尽[W]的东西。它需要我们的尊重。河流的回归是给所有面临环境挑战的社区的一个[W]的希望信息。" }
+                ]
+            }
+        ];
+
+        function generateWithTemplate(vocabulary) {
+            // 随机选一个框架
+            const framework = STORY_FRAMEWORKS[Math.floor(Math.random() * STORY_FRAMEWORKS.length)];
+
+            // 打乱词汇顺序
+            const pool = [...vocabulary].sort(() => Math.random() - 0.5);
+
+            let wordIdx = 0;
+            const usedWords = [];
+
+            function takeWord() {
+                if (wordIdx >= pool.length) return null;
+                const w = pool[wordIdx++];
+                usedWords.push(w);
+                return w;
+            }
+
+            const paragraphs = framework.paras.map(para => {
                 const enWords = [];
-                // 填充英文模板
-                let enHtml = tpl.en.replace(/\[W\]/g, () => {
-                    const w = take();
+                let enHtml = para.en.replace(/\[W\]/g, () => {
+                    const w = takeWord();
                     if (w) enWords.push(w);
-                    return w ? use(w) : '';
+                    return w ? `**${w.en}**` : '...';
                 });
                 enHtml = enHtml.replace(/\s{2,}/g, ' ').replace(/\s([.,;:!?])/g, '$1').trim();
 
-                // 用相同顺序的词汇/短语填充中文模板
-                let wordIdx = 0;
-                let cnHtml = tpl.cn.replace(/\[W\]/g, () => {
-                    const w = enWords[wordIdx++];
-                    return w ? `<strong style="color:var(--accent);">${escapeHtml(w.cn)}</strong>` : '…';
+                let wi = 0;
+                let cnHtml = para.cn.replace(/\[W\]/g, () => {
+                    const w = enWords[wi++];
+                    return w ? `<strong>${escapeHtml(w.cn)}</strong>` : '…';
                 });
                 cnHtml = cnHtml.replace(/\s{2,}/g, ' ').trim();
 
-                paras.push({ en: enHtml, cn: cnHtml });
-            }
+                return { en: enHtml, cn: cnHtml };
+            });
 
-            const articleHTML = `<h3>📖 The Scientist's Notebook</h3>`
-                + paras.map((p, i) => {
-                    // Wrap plain words in each paragraph with click handlers
+            return { title: framework.title, paragraphs: paragraphs };
+        }
+
+        // ========== 最终挑战故事渲染 ==========
+        function renderStoryArticle(storyData) {
+            const vocabMap = {};
+            currentVocabulary.forEach(v => { vocabMap[v.en.toLowerCase()] = v; });
+
+            // 渲染词汇银行
+            document.getElementById('bankTags').innerHTML = currentVocabulary.map(v =>
+                `<span class="bank-tag" onclick="onBankTagClick('${escapeHtml(v.en)}')">${escapeHtml(v.en)}</span>`
+            ).join('');
+
+            // 渲染文章
+            const articleHTML = `<h3>📖 ${escapeHtml(storyData.title)}</h3>`
+                + storyData.paragraphs.map((p, i) => {
+                    // 处理英文段落：**word** → 高亮 span，其余 → 可点击查词
                     let result = '';
                     let lastIdx = 0;
-                    const regex = /<span class="word-highlight"[^>]*>.*?<\/span>/g;
+                    const regex = /\*\*(.+?)\*\*/g;
                     let match;
                     let enText = p.en;
                     while ((match = regex.exec(enText)) !== null) {
-                        if (match.index > lastIdx) result += wrapPlainWords(enText.slice(lastIdx, match.index));
-                        result += match[0];
+                        // 前面的普通文本
+                        if (match.index > lastIdx) {
+                            result += wrapPlainWords(enText.slice(lastIdx, match.index));
+                        }
+                        // 高亮目标词
+                        const term = match[1];
+                        const vocabEntry = vocabMap[term.toLowerCase()];
+                        result += `<span class="word-highlight" data-term="${escapeHtml(term)}" onclick="event.stopPropagation();onHighlightClick('${escapeJsString(escapeHtml(term))}')">${escapeHtml(term)}</span>`;
                         lastIdx = match.index + match[0].length;
                     }
-                    if (lastIdx < enText.length) result += wrapPlainWords(enText.slice(lastIdx));
+                    if (lastIdx < enText.length) {
+                        result += wrapPlainWords(enText.slice(lastIdx));
+                    }
                     return `<p>${result}</p>
                 <button class="para-translate-btn" onclick="toggleParaTranslation(event, ${i})">📝 显示翻译</button>
                 <div class="para-translation" id="paraTrans${i}">${p.cn}</div>`;
