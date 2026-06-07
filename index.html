@@ -2163,22 +2163,26 @@
                 return;
             }
 
-            // 如果已完成且有保存的故事，直接查看故事
-            if (record.completed && record.storyData) {
-                currentVocabulary = buildVocabulary(record.wordIndices);
-                currentHistoryId = historyId;
-                cameFromArticle = false;
-                hideAllPages();
-                document.getElementById('challengePage').style.display = 'flex';
-                document.getElementById('challengePage').classList.add('active');
-                document.getElementById('btnBackArticle').classList.remove('visible');
-                renderStoryArticle(record.storyData);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                return;
-            }
-
             currentVocabulary = buildVocabulary(record.wordIndices);
             currentHistoryId = historyId;
+
+            // 如果已完成，直接进入挑战页（有缓存用缓存，无缓存现场生成并保存）
+            if (record.completed) {
+                if (record.storyData) {
+                    console.log('[故事缓存] ✅ 命中缓存，直接展示故事');
+                    cameFromArticle = false;
+                    hideAllPages();
+                    document.getElementById('challengePage').style.display = 'flex';
+                    document.getElementById('challengePage').classList.add('active');
+                    document.getElementById('btnBackArticle').classList.remove('visible');
+                    renderStoryArticle(record.storyData);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    console.log('[故事缓存] ⚠️ 已完成但无缓存，现场生成');
+                    goToChallenge();
+                }
+                return;
+            }
 
             currentIndex = 0;
             cnRevealed = false;
@@ -3081,6 +3085,7 @@
                 const history = getHistory();
                 const record = history.find(h => h.id === currentHistoryId);
                 if (record && record.storyData) {
+                    console.log('[故事缓存] ✅ goToChallenge 命中缓存，跳过生成');
                     hideAllPages();
                     document.getElementById('challengePage').style.display = 'flex';
                     document.getElementById('challengePage').classList.add('active');
@@ -3089,6 +3094,7 @@
                     return;
                 }
             }
+            console.log('[故事缓存] 🆕 无缓存，开始生成新故事');
 
             hideAllPages();
             document.getElementById('challengePage').style.display = 'flex';
@@ -3127,6 +3133,7 @@
                 if (record) {
                     record.storyData = storyData;
                     saveHistory(history);
+                    console.log('[故事缓存] 💾 已保存故事到历史记录:', currentHistoryId);
                 }
             }
         }
