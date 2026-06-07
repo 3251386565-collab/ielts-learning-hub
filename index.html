@@ -1711,6 +1711,7 @@
                                 <div class="h-meta">
                                     <span>📊 ${h.wordIndices?.length || 0} 个词汇短语</span>
                                     <span>${h.completed ? '✅ 已完成' : '⏳ 未完成'}</span>
+                                    ${h.completed && h.storyData ? '<span>📖 可查看故事</span>' : ''}
                                 </div>
                                 <div class="h-tags">
                                     ${previewWords.map(w => `<span class="h-tag">${escapeHtml(w)}</span>`).join('')}
@@ -2161,6 +2162,21 @@
                 alert('历史记录无效');
                 return;
             }
+
+            // 如果已完成且有保存的故事，直接查看故事
+            if (record.completed && record.storyData) {
+                currentVocabulary = buildVocabulary(record.wordIndices);
+                currentHistoryId = historyId;
+                cameFromArticle = false;
+                hideAllPages();
+                document.getElementById('challengePage').style.display = 'flex';
+                document.getElementById('challengePage').classList.add('active');
+                document.getElementById('btnBackArticle').classList.remove('visible');
+                renderStoryArticle(record.storyData);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+
             currentVocabulary = buildVocabulary(record.wordIndices);
             currentHistoryId = historyId;
 
@@ -3059,6 +3075,21 @@
             stopSpeaking();
             cameFromArticle = false;
             document.getElementById('btnBackArticle').classList.remove('visible');
+
+            // 如果已有缓存的故事，直接使用
+            if (currentHistoryId) {
+                const history = getHistory();
+                const record = history.find(h => h.id === currentHistoryId);
+                if (record && record.storyData) {
+                    hideAllPages();
+                    document.getElementById('challengePage').style.display = 'flex';
+                    document.getElementById('challengePage').classList.add('active');
+                    renderStoryArticle(record.storyData);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    return;
+                }
+            }
+
             hideAllPages();
             document.getElementById('challengePage').style.display = 'flex';
             document.getElementById('challengePage').classList.add('active');
@@ -3088,6 +3119,16 @@
             }
 
             renderStoryArticle(storyData);
+
+            // 保存故事到历史记录，确保下次打开不再重新生成
+            if (currentHistoryId) {
+                const history = getHistory();
+                const record = history.find(h => h.id === currentHistoryId);
+                if (record) {
+                    record.storyData = storyData;
+                    saveHistory(history);
+                }
+            }
         }
 
         function restart() {
@@ -3417,12 +3458,35 @@ The ** markers in English text will be used to highlight the target words. Make 
             }
         ];
 
-        function generateWithTemplate(vocabulary) {
-            // 随机选一个框架
-            const framework = STORY_FRAMEWORKS[Math.floor(Math.random() * STORY_FRAMEWORKS.length)];
+        // ========== 确定性随机（基于 historyId 种子，确保同一次学习生成相同故事） ==========
+        function hashString(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Convert to 32bit integer
+            }
+            return Math.abs(hash);
+        }
 
-            // 打乱词汇顺序
-            const pool = [...vocabulary].sort(() => Math.random() - 0.5);
+        function seededRandom(seed) {
+            let s = hashString(seed);
+            return function() {
+                s = (s * 1664525 + 1013904223) & 0xFFFFFFFF;
+                return (s >>> 0) / 0xFFFFFFFF;
+            };
+        }
+
+        function generateWithTemplate(vocabulary) {
+            // 使用 currentHistoryId 作为随机种子，确保同一次学习始终生成相同故事
+            const seed = currentHistoryId || Date.now().toString();
+            const rng = seededRandom(seed);
+
+            // 用确定性随机选框架
+            const framework = STORY_FRAMEWORKS[Math.floor(rng() * STORY_FRAMEWORKS.length)];
+
+            // 用确定性随机打乱词汇顺序
+            const pool = [...vocabulary].sort(() => rng() - 0.5);
 
             let wordIdx = 0;
             const usedWords = [];
